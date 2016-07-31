@@ -1,0 +1,18 @@
+#ifndef __LADY
+#define __LADY
+
+#include "core/shape_function.hpp"
+#include "core/quad_points.hpp"
+#include "core/parcel.hpp"
+#include "core/dycore.hpp"
+
+#include "domain/domain_config.hpp"
+#include "domain/cartesian_domain.hpp"
+
+#include "mesh/structured_mesh_config.hpp"
+#include "mesh/structured_mesh.hpp"
+
+#include "field/structured_field_config.hpp"
+#include "field/structured_field.hpp"
+
+#endif
