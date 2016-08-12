@@ -12,11 +12,14 @@ class QuadPoints {
 public:
   static vector<vec::fixed<NUM_DIM>> y;
   static vec w;
+  static vec f;
   Parcel<NUM_DIM> *hostParcel;
   vector<vec::fixed<NUM_DIM>> x;
   vector<vec::fixed<NUM_DIM>> v;
   vec rho;
   vec T;
+
+  static int num;
 
   QuadPoints();
   ~QuadPoints();

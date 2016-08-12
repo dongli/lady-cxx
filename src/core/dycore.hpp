@@ -29,13 +29,15 @@ private:
   FieldType T;
   SearchType *meshSearch;
 
+  int oldTi, newTi;
+
 public:
   Dycore();
   ~Dycore();
 
   void init(const typename MeshType::MeshConfigType &meshConfig);
 
-  void inputData(int ti, const FieldType &p, const FieldType &T);
+  void inputData(const FieldType &p, const FieldType &T);
 
   void run();
 

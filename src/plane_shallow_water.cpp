@@ -23,7 +23,7 @@ int main(int argc, char const *argv[]) {
 
   p().fill(1);
   T().fill(1);
-  dycore.inputData(0, p, T);
+  dycore.inputData(p, T);
 
   dycore.run();
 

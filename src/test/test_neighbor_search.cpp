@@ -3,7 +3,7 @@
 
 TEST_CASE_METHOD(DycoreCartesian2dFixture, "use RangeSearch in MLPACK to find out neighbor points", "[Dycore]") {
   for (int pi = 0; pi < dycore.parcels[0].size(); pi++) {
-    REQUIRE(dycore.parcels[0][pi].numNeighbor == 12);
+    REQUIRE(dycore.parcels[0][pi].numNeighbor == 24);
     uvec i(dycore.parcels[0][pi].numNeighbor);
     for (int ni = 0; ni < dycore.parcels[0][pi].numNeighbor; ni++) {
       i[ni] = dycore.parcels[0][pi].neighbors[ni]->id;
