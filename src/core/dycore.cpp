@@ -67,6 +67,9 @@ void Dycore<NUM_DIM, FieldTemplate>::inputData(const FieldType &p, const FieldTy
   for (int pi = 0; pi < mesh.numGrid(); pi++) {
     parcels[0][pi].m = x2[pi];
     parcels[0][pi].u = x1[pi] / x2[pi];
+    // TODO: Set initial velocity.
+    parcels[0][pi].v.zeros();
+    parcels[0][pi].dH.zeros();
   }
   // Copy input data into internal fields.
   this->p = p;
@@ -79,6 +82,8 @@ void Dycore<NUM_DIM, FieldTemplate>::run() {
   for (int pi = 0; pi < parcels[oldTi].size(); pi++) {
     quadPoints[oldTi][pi].update(domain);
   }
+  // Calculate forces acted on parcels.
+  calcForces(oldTi);
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
@@ -105,6 +110,13 @@ void Dycore<NUM_DIM, FieldTemplate>::findNeighbors(int ti) {
       if (neighbors[0][ni] == pi) continue;
       parcels[ti][pi].neighbors[mi++] = &parcels[ti][neighbors[0][ni]];
     }
+  }
+}
+
+template <int NUM_DIM, template <int ...> class FieldTemplate>
+void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
+  for (int pi = 0; pi < parcels[ti].size(); pi++) {
+
   }
 }
 

@@ -65,6 +65,7 @@ void QuadPoints<NUM_DIM>::update(const DomainType &domain) {
   rho.zeros();
   T.zeros();
   for (int qi = 0; qi < num; qi++) {
+    this->v[qi].zeros();
     hostParcel->getSpaceCoord(domain, this->y[qi], x[qi]);
     for (int ni = 0; ni < hostParcel->numNeighbor; ni++) {
       Parcel<NUM_DIM> *neighbor = hostParcel->neighbors[ni];

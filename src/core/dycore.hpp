@@ -44,7 +44,11 @@ public:
 private:
   void findNeighbors(int ti);
 
+  void calcForces(int ti);
+
   void regrid(int ti);
+
+  void reorder(int ti);
 };
 
 }
