@@ -9,15 +9,17 @@ enum AxisBoundaryType {
   OPEN, PERIODIC, RIGID
 };
 
+template <int NUM_DIM>
 class DomainConfig {
 public:
   field<AxisBoundaryType> axisBoundaryTypes;
-  Vec axisStartCoords;
-  Vec axisEndCoords;
+  vec::fixed<NUM_DIM> axisStartCoords;
+  vec::fixed<NUM_DIM> axisEndCoords;
+  vec::fixed<NUM_DIM> axisSpans;
 
-  DomainConfig() {
-    axisBoundaryTypes.set_size(NUM_DIM);
-  }
+  DomainConfig();
+
+  DomainConfig<NUM_DIM>& operator=(const DomainConfig<NUM_DIM> &);
 };
 
 }

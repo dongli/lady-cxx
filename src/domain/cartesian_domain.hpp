@@ -5,14 +5,16 @@
 
 namespace lady {
 
-class CartesianDomain : public Domain {
+template <int NUM_DIM>
+class CartesianDomain : public Domain<NUM_DIM> {
 public:
-  CartesianDomain() : Domain() {}
+  CartesianDomain();
   virtual ~CartesianDomain() {}
 
-  Vec diffCoord(const Vec &x, const Vec &y) const;
+  vec::fixed<NUM_DIM> subCoord(const vec::fixed<NUM_DIM> &x, const vec::fixed<NUM_DIM> &y) const;
+  vec::fixed<NUM_DIM> addCoord(const vec::fixed<NUM_DIM> &x, const vec::fixed<NUM_DIM> &y) const;
 
-  double distance(const Vec &x, const Vec &y) const;
+  double distance(const vec::fixed<NUM_DIM> &x, const vec::fixed<NUM_DIM> &y) const;
 };
 
 }

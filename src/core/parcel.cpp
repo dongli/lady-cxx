@@ -3,39 +3,40 @@
 
 namespace lady {
 
-Parcel::Parcel() {
+template class Parcel<2>;
+template class Parcel<3>;
+
+template <int NUM_DIM>
+Parcel<NUM_DIM>::Parcel() {
 }
 
-Parcel::~Parcel() {
+template <int NUM_DIM>
+Parcel<NUM_DIM>::~Parcel() {
 }
 
-void Parcel::init(int id, const Vec &x, const Vec &size) {
+template <int NUM_DIM>
+void Parcel<NUM_DIM>::init(int id, const vec::fixed<NUM_DIM> &x, const vec::fixed<NUM_DIM> &size) {
   this->id = id;
   this->x = x;
   this->H.zeros();
-  this->H.diag() = size * 1.5;
+  this->H.diag() = size * 2;
   afterMatrixChanged();
 }
 
-void Parcel::getBodyCoord(const Vec &x, Vec &y) const {
-  y = invH * (x - this->x);
-}
-
-void Parcel::getSpaceCoord(const Vec &y, Vec &x) const {
-  x = this->x + H * y;
-}
-
-void Parcel::getLocalVelocity(const Vec &y, Vec &v) const {
+template <int NUM_DIM>
+void Parcel<NUM_DIM>::getLocalVelocity(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_DIM> &v) const {
   v = this->v + dH * y;
 }
 
-void Parcel::getShapeFunctionDerivatives(const Vec &y, double f, Vec &dfdx, Vec &dfdH) const {
-  ShapeFunction::diff(y, dfdx);
+template <int NUM_DIM>
+void Parcel<NUM_DIM>::getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx, vec::fixed<NUM_DIM> &dfdH) const {
+  ShapeFunction<NUM_DIM>::diff(y, dfdx);
   dfdx = - invH.t() * dfdx / detH;
   dfdH = dfdx * y.t() - f * invH.t();
 }
 
-void Parcel::afterMatrixChanged() {
+template <int NUM_DIM>
+void Parcel<NUM_DIM>::afterMatrixChanged() {
   detH = det(H);
   invH = inv(H);
   svd(U, S, V, H);

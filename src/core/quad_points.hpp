@@ -5,15 +5,16 @@
 
 namespace lady {
 
-class Parcel;
+template <int NUM_DIM> class Parcel;
 
+template <int NUM_DIM>
 class QuadPoints {
 public:
-  static vector<Vec> y;
+  static vector<vec::fixed<NUM_DIM>> y;
   static vec w;
-  Parcel *hostParcel;
-  vector<Vec> x;
-  vector<Vec> v;
+  Parcel<NUM_DIM> *hostParcel;
+  vector<vec::fixed<NUM_DIM>> x;
+  vector<vec::fixed<NUM_DIM>> v;
   vec rho;
   vec T;
 
@@ -22,9 +23,10 @@ public:
 
   static void init();
 
-  void init(Parcel *parcel);
+  void init(Parcel<NUM_DIM> *parcel);
 
-  void update();
+  template <class DomainType>
+  void update(const DomainType &domain);
 };
 
 }

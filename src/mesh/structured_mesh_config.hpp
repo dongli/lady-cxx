@@ -5,12 +5,13 @@
 
 namespace lady {
 
-class StructuredMeshConfig : public MeshConfig {
+template <int NUM_DIM>
+class StructuredMeshConfig : public MeshConfig<NUM_DIM> {
 public:
-  Uvec numGridAlongEachAxis;
+  uvec::fixed<NUM_DIM> numGridAlongEachAxis;
 
-  StructuredMeshConfig(const DomainConfig &domainConfig) : MeshConfig(domainConfig) {}
-  virtual ~StructuredMeshConfig() {}
+  StructuredMeshConfig(const DomainConfig<NUM_DIM> &domainConfig);
+  virtual ~StructuredMeshConfig();
 };
 
 }

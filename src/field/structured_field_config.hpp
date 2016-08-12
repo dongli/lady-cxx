@@ -9,11 +9,12 @@ enum StructuredFieldElementStagger {
   CENTER, VERTEX, FACE_CENTER
 };
 
-class StructuredFieldConfig : public FieldConfig<StructuredMeshConfig> {
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
+class StructuredFieldConfig : public FieldConfig<NUM_DIM, MeshConfigTemplate> {
 public:
   StructuredFieldElementStagger stagger;
 
-  StructuredFieldConfig(const StructuredMeshConfig &meshConfig);
+  StructuredFieldConfig(const MeshConfigTemplate<NUM_DIM> &meshConfig);
   virtual ~StructuredFieldConfig();
 };
 

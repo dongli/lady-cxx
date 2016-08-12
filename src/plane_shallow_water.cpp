@@ -1,10 +1,11 @@
-#include "dycore.hpp"
-#include "structured_field_config.hpp"
+#include "lady/cartesian.hpp"
 
 int main(int argc, char const *argv[]) {
-  lady::DomainConfig domainConfig;
-  lady::StructuredMeshConfig meshConfig(domainConfig);
-  lady::Dycore dycore;
+  lady::logger::init();
+
+  lady::DomainConfig<2> domainConfig;
+  lady::CartesianMeshConfig<2> meshConfig(domainConfig);
+  lady::Dycore<2, lady::CartesianField> dycore;
 
   domainConfig.axisStartCoords = { 0.0, 0.0 };
   domainConfig.axisEndCoords = { 1.0, 1.0 };
@@ -13,8 +14,8 @@ int main(int argc, char const *argv[]) {
   meshConfig.numGridAlongEachAxis[1] = 5;
   dycore.init(meshConfig);
 
-  lady::StructuredFieldConfig fieldConfig(meshConfig);
-  lady::StructuredField p, T;
+  lady::CartesianFieldConfig<2> fieldConfig(meshConfig);
+  lady::CartesianField<2> p, T;
 
   fieldConfig.stagger = lady::StructuredFieldElementStagger::CENTER;
   p.init(fieldConfig);

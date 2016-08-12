@@ -5,24 +5,25 @@
 
 namespace lady {
 
+template <int NUM_DIM>
 class Parcel {
 public:
   int id;
   double m;
   double u;
-  Vec x;
-  Vec v;
-  Mat H;
-  Mat dH;
-  Mat invH;
-  Mat U;
-  Mat V;
-  Vec S;
+  vec::fixed<NUM_DIM> x;
+  vec::fixed<NUM_DIM> v;
+  mat::fixed<NUM_DIM, NUM_DIM> H;
+  mat::fixed<NUM_DIM, NUM_DIM> dH;
+  mat::fixed<NUM_DIM, NUM_DIM> invH;
+  mat::fixed<NUM_DIM, NUM_DIM> U;
+  mat::fixed<NUM_DIM, NUM_DIM> V;
+  vec::fixed<NUM_DIM> S;
   double detH;
-  Vec Fp;
-  Vec Mp;
-  Vec Fr;
-  Vec Mr;
+  vec::fixed<NUM_DIM> Fp;
+  vec::fixed<NUM_DIM> Mp;
+  vec::fixed<NUM_DIM> Fr;
+  vec::fixed<NUM_DIM> Mr;
   double Q;
 
   int numNeighbor;
@@ -31,17 +32,23 @@ public:
   Parcel();
   ~Parcel();
 
-  void init(int id, const Vec &x, const Vec &size);
+  void init(int id, const vec::fixed<NUM_DIM> &x, const vec::fixed<NUM_DIM> &size);
 
   double shapeSize(int ai) const { return S[ai]; }
 
-  void getBodyCoord(const Vec &x, Vec &y) const;
+  template <class DomainType>
+  void getBodyCoord(const DomainType &domain, const vec::fixed<NUM_DIM> &x, vec::fixed<NUM_DIM> &y) const {
+    y = invH * domain.subCoord(x, this->x);
+  }
 
-  void getSpaceCoord(const Vec &y, Vec &x) const;
+  template <class DomainType>
+  void getSpaceCoord(const DomainType &domain, const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_DIM> &x) const {
+    x = domain.addCoord(this->x, H * y);
+  }
 
-  void getLocalVelocity(const Vec &y, Vec &v) const;
+  void getLocalVelocity(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_DIM> &v) const;
 
-  void getShapeFunctionDerivatives(const Vec &y, double f, Vec &dfdx, Vec &dfdH) const;
+  void getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx, vec::fixed<NUM_DIM> &dfdH) const;
 
   void afterMatrixChanged();
 };

@@ -1,0 +1,23 @@
+#include "logger.hpp"
+
+namespace lady {
+namespace logger {
+
+record logger::Note::rec;
+record_ostream logger::Note::ros;
+record logger::Warn::rec;
+record_ostream logger::Warn::ros;
+record logger::Error::rec;
+record_ostream logger::Error::ros;
+
+void init() {
+  add_console_log(std::cout,
+    keywords::format = (
+      expressions::stream
+        << "[" << expressions::attr<SeverityLevel>("Severity") << "]: "
+        << expressions::smessage
+    )
+  );
+}
+
+}}

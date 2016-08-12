@@ -3,9 +3,13 @@
 
 namespace lady {
 
-void Domain::init(const DomainConfig &domainConfig) {
-  _domainConfig = &domainConfig;
-  DomainMetric::init(this);
+template class Domain<2>;
+template class Domain<3>;
+
+template <int NUM_DIM>
+void Domain<NUM_DIM>::init(const DomainConfig<NUM_DIM> &domainConfig) {
+  _domainConfig = domainConfig;
+  _domainConfig.axisSpans = _domainConfig.axisEndCoords - _domainConfig.axisStartCoords;
 }
 
 }

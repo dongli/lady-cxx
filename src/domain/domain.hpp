@@ -6,14 +6,15 @@
 
 namespace lady {
 
+template <int NUM_DIM>
 class Domain {
 protected:
-  const DomainConfig *_domainConfig;
+  DomainConfig<NUM_DIM> _domainConfig;
 public:
   Domain() {}
   virtual ~Domain() {}
 
-  void init(const DomainConfig &domainConfig);
+  void init(const DomainConfig<NUM_DIM> &domainConfig);
 };
 
 }

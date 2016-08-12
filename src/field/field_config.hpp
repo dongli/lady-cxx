@@ -2,12 +2,14 @@
 #define __LADY_FieldConfig
 
 #include "common.hpp"
-#include "mesh_config.hpp"
 
 namespace lady {
 
-template <class MeshConfigType>
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
 class FieldConfig {
+public:
+  typedef MeshConfigTemplate<NUM_DIM> MeshConfigType;
+private:
   const MeshConfigType *_meshConfig;
 public:
   FieldConfig(const MeshConfigType &meshConfig) {

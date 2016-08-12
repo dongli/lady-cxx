@@ -1,11 +1,17 @@
 #include "domain_metric.hpp"
+#include "cartesian_domain.hpp"
 
 namespace lady {
 
-const DomainType* DomainMetric::_domain = NULL;
+template class DomainMetric<CartesianDomain<2>>;
+template class DomainMetric<CartesianDomain<3>>;
 
-void DomainMetric::init(const Domain *domain) {
-  _domain = static_cast<const DomainType*>(domain);
+template <class DomainType>
+const DomainType* DomainMetric<DomainType>::_domain = NULL;
+
+template <class DomainType>
+void DomainMetric<DomainType>::init(const DomainType *domain) {
+  _domain = domain;
 }
 
 }

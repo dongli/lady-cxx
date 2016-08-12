@@ -2,11 +2,20 @@
 
 namespace lady {
 
-vec ShapeFunction::nodes;
-vec ShapeFunction::weights;
-const double ShapeFunction::J = 1.0 / 12.0;
+template class ShapeFunction<2>;
+template class ShapeFunction<3>;
 
-void ShapeFunction::init() {
+template <int NUM_DIM>
+vec ShapeFunction<NUM_DIM>::nodes;
+template <int NUM_DIM>
+vec ShapeFunction<NUM_DIM>::weights;
+template <int NUM_DIM>
+const double ShapeFunction<NUM_DIM>::C = pow(4.0 / 3.0, NUM_DIM);
+template <int NUM_DIM>
+const double ShapeFunction<NUM_DIM>::J = 1.0 / 12.0;
+
+template <int NUM_DIM>
+void ShapeFunction<NUM_DIM>::init() {
   nodes.set_size(5);
   nodes[0] = -2.0 / 3.0;
   nodes[1] = -1.0 / 3.0;
@@ -19,10 +28,10 @@ void ShapeFunction::init() {
   weights[2] = 566.0 / 1280.0;
   weights[3] = 316.0 / 1280.0;
   weights[4] =  41.0 / 1280.0;
-
 }
 
-void ShapeFunction::eval(const Vec &y, double &f) {
+template <int NUM_DIM>
+void ShapeFunction<NUM_DIM>::eval(const vec::fixed<NUM_DIM> &y, double &f) {
   f = 1.0;
   for (int i = 0; i < y.size(); ++i) {
     if (-1.0 <= y[i] && y[i] <= -0.5) {
@@ -37,11 +46,12 @@ void ShapeFunction::eval(const Vec &y, double &f) {
       f = 0.0;
       return;
     }
-    f *= 4.0 / 3.0;
   }
+  f *= C;
 }
 
-void ShapeFunction::diff(const Vec &y, Vec &df) {
+template <int NUM_DIM>
+void ShapeFunction<NUM_DIM>::diff(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_DIM> &df) {
   df.ones();
   for (int i = 0; i < y.size(); ++i) {
     for (int j = 0; j < y.size(); ++j) {
@@ -72,8 +82,8 @@ void ShapeFunction::diff(const Vec &y, Vec &df) {
           continue;
         }
       }
-      df[i] *= 4.0 / 3.0;
     }
+    df[i] *= C;
   }
 }
 

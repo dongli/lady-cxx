@@ -2,17 +2,24 @@
 
 namespace lady {
 
-StructuredMesh::StructuredMesh() {
+template class StructuredMesh<2>;
+template class StructuredMesh<3>;
+
+template <int NUM_DIM>
+StructuredMesh<NUM_DIM>::StructuredMesh() {
 }
 
-StructuredMesh::~StructuredMesh() {
+template <int NUM_DIM>
+StructuredMesh<NUM_DIM>::~StructuredMesh() {
 
 }
 
-void StructuredMesh::init(const StructuredMeshConfig &meshConfig) {
-  const DomainConfig &domainConfig = meshConfig.domainConfig();
-  _gridCoords.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
-  _gridSizes.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
+template <int NUM_DIM>
+void StructuredMesh<NUM_DIM>::init(const MeshConfig<NUM_DIM> &_meshConfig) {
+  auto &domainConfig = _meshConfig.domainConfig();
+  auto meshConfig = static_cast<const StructuredMeshConfig<NUM_DIM>&>(_meshConfig);
+  this->_gridCoords.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
+  this->_gridSizes.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
   // FIXME: Parallel-note: Specify the space decomposition.
   vec grids[NUM_DIM];
   vec intervals[NUM_DIM];
@@ -22,12 +29,12 @@ void StructuredMesh::init(const StructuredMeshConfig &meshConfig) {
     for (int ai = 0; ai < meshConfig.numGridAlongEachAxis[di]; ai++) {
       // Currently, the grids are even distributed.
       intervals[di][ai] = (domainConfig.axisEndCoords[di] - domainConfig.axisStartCoords[di]) / meshConfig.numGridAlongEachAxis[di];
-      grids[di][ai] = domainConfig.axisStartCoords[ai] + intervals[di][ai] * (ai + 0.5);
+      grids[di][ai] = domainConfig.axisStartCoords[di] + intervals[di][ai] * (ai + 0.5);
     }
   }
   int ai[NUM_DIM], tmp;
   double offset;
-  for (int gi = 0; gi < _gridCoords.n_cols; gi++) {
+  for (int gi = 0; gi < this->_gridCoords.n_cols; gi++) {
     offset = 0;
     for (int di = NUM_DIM-1; di >= 0; di--) {
       if (di != NUM_DIM-1) {
@@ -42,8 +49,8 @@ void StructuredMesh::init(const StructuredMeshConfig &meshConfig) {
         tmp *= meshConfig.numGridAlongEachAxis[i];
       }
       ai[di] = floor(static_cast<double>(gi-offset) / tmp);
-      _gridCoords(di, gi) = grids[di][ai[di]];
-      _gridSizes(di, gi) = intervals[di][ai[di]];
+      this->_gridCoords(di, gi) = grids[di][ai[di]];
+      this->_gridSizes(di, gi) = intervals[di][ai[di]];
     }
   }
 }

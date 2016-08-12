@@ -6,12 +6,17 @@
 
 namespace lady {
 
-class StructuredMesh : public Mesh {
+/**
+ *  This class is not for direct use. Use CartesianMesh instead.
+ */
+
+template <int NUM_DIM>
+class StructuredMesh : public Mesh<NUM_DIM> {
 public:
   StructuredMesh();
   virtual ~StructuredMesh();
 
-  void init(const StructuredMeshConfig &config);
+  virtual void init(const MeshConfig<NUM_DIM> &meshConfig);
 };
 
 }
