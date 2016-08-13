@@ -79,9 +79,7 @@ void Dycore<NUM_DIM, FieldTemplate>::inputData(const FieldType &p, const FieldTy
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::run() {
   // Update quadrature points.
-  for (int pi = 0; pi < parcels[oldTi].size(); pi++) {
-    quadPoints[oldTi][pi].update(domain);
-  }
+  updateQuadPoints(oldTi);
   // Calculate forces acted on parcels.
   calcForces(oldTi);
 }
@@ -114,9 +112,54 @@ void Dycore<NUM_DIM, FieldTemplate>::findNeighbors(int ti) {
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
+void Dycore<NUM_DIM, FieldTemplate>::updateQuadPoints(int ti) {
   for (int pi = 0; pi < parcels[ti].size(); pi++) {
+    quadPoints[ti][pi].update(domain);
+  }
+}
 
+template <int NUM_DIM, template <int ...> class FieldTemplate>
+void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
+  double f, rho, T, w, a1;
+  vec::fixed<NUM_DIM> y, v, vi, a2;
+  mat::fixed<NUM_DIM, NUM_DIM> a3;
+  for (int pi = 0; pi < parcels[ti].size(); pi++) {
+    parcels[ti][pi].Fp.zeros();
+    parcels[ti][pi].Mp.zeros();
+    parcels[ti][pi].Fr.zeros();
+    parcels[ti][pi].Mr.zeros();
+    parcels[ti][pi].Q = 0;
+    for (int ni = 0; ni < parcels[ti][pi].numNeighbor; ni++) {
+      const Parcel<NUM_DIM> &neighbor = *parcels[ti][pi].neighbors[ni];
+      for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
+        parcels[ti][pi].getBodyCoord(domain, quadPoints[ti][neighbor.id].x[qi], y);
+        ShapeFunction<NUM_DIM>::eval(y, f);
+        if (std::abs(f) < 1.0e-16) continue;
+        rho = quadPoints[ti][neighbor.id].rho[qi];
+        T = quadPoints[ti][neighbor.id].T[qi];
+        v = quadPoints[ti][neighbor.id].v[qi];
+        parcels[ti][pi].getLocalVelocity(y, vi);
+        w = QuadPoints<NUM_DIM>::w[qi];
+        // First part of pressure force
+        a1 = neighbor.m * w * (parcels[ti][pi].u - CV * T) / rho;
+        parcels[ti][pi].getShapeFunctionDerivatives(y, f, a2, a3);
+        parcels[ti][pi].Fp -= a1 * a2;
+        parcels[ti][pi].Mp -= a1 * a3;
+        // Friction force
+      }
+    }
+    // Second part of pressure force
+    for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
+      rho = quadPoints[ti][pi].rho[qi];
+      T = quadPoints[ti][pi].T[qi];
+      parcels[ti][pi].getShapeFunctionDerivatives(QuadPoints<NUM_DIM>::y[qi], QuadPoints<NUM_DIM>::f[qi], a2);
+      w = QuadPoints<NUM_DIM>::w[qi];
+      a1 = parcels[ti][pi].m * w * (parcels[ti][pi].u - CV * T) / rho;
+      parcels[ti][pi].Fp -= a1 * a2;
+      parcels[ti][pi].Mp -= a1 * a2 * QuadPoints<NUM_DIM>::y[qi].t();
+    }
+    parcels[ti][pi].Fp /= parcels[ti][pi].m;
+    parcels[ti][pi].Mp /= parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
   }
 }
 

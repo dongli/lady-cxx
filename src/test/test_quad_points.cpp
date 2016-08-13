@@ -21,7 +21,7 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "initialize quadrature points", "[Dyc
     p().fill(1);
     T().fill(2);
     dycore.inputData(p, T);
-    dycore.run();
+    dycore.updateQuadPoints(0);
     for (int pi = 0; pi < dycore.parcels[0].size(); pi++) {
       for (int qi = 0; qi < lady::QuadPoints<2>::num; qi++) {
         REQUIRE(dycore.quadPoints[0][pi].rho[qi] == Approx(1.0 / 2.0 / lady::RD));

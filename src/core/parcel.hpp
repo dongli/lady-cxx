@@ -21,9 +21,9 @@ public:
   vec::fixed<NUM_DIM> S;
   double detH;
   vec::fixed<NUM_DIM> Fp;
-  vec::fixed<NUM_DIM> Mp;
+  mat::fixed<NUM_DIM, NUM_DIM> Mp;
   vec::fixed<NUM_DIM> Fr;
-  vec::fixed<NUM_DIM> Mr;
+  mat::fixed<NUM_DIM, NUM_DIM> Mr;
   double Q;
 
   int numNeighbor;
@@ -48,7 +48,9 @@ public:
 
   void getLocalVelocity(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_DIM> &v) const;
 
-  void getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx, vec::fixed<NUM_DIM> &dfdH) const;
+  void getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx) const;
+
+  void getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdxi, mat::fixed<NUM_DIM, NUM_DIM> &dfdHi) const;
 
   void afterMatrixChanged();
 };

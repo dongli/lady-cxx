@@ -29,10 +29,16 @@ void Parcel<NUM_DIM>::getLocalVelocity(const vec::fixed<NUM_DIM> &y, vec::fixed<
 }
 
 template <int NUM_DIM>
-void Parcel<NUM_DIM>::getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx, vec::fixed<NUM_DIM> &dfdH) const {
+void Parcel<NUM_DIM>::getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdx) const {
   ShapeFunction<NUM_DIM>::diff(y, dfdx);
-  dfdx = - invH.t() * dfdx / detH;
-  dfdH = dfdx * y.t() - f * invH.t();
+  dfdx = invH.t() * dfdx / detH;
+}
+
+template <int NUM_DIM>
+void Parcel<NUM_DIM>::getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdxi, mat::fixed<NUM_DIM, NUM_DIM> &dfdHi) const {
+  ShapeFunction<NUM_DIM>::diff(y, dfdxi);
+  dfdxi = - invH.t() * dfdxi / detH;
+  dfdHi = dfdxi * y.t() - f * invH.t();
 }
 
 template <int NUM_DIM>

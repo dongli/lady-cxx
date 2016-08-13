@@ -44,6 +44,8 @@ public:
 private:
   void findNeighbors(int ti);
 
+  void updateQuadPoints(int ti);
+
   void calcForces(int ti);
 
   void regrid(int ti);
