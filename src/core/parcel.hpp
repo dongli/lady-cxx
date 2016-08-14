@@ -24,7 +24,7 @@ public:
   mat::fixed<NUM_DIM, NUM_DIM> Mp;
   vec::fixed<NUM_DIM> Fr;
   mat::fixed<NUM_DIM, NUM_DIM> Mr;
-  double Q;
+  double Qr;
 
   int numNeighbor;
   vector<Parcel*> neighbors;

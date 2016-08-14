@@ -120,7 +120,7 @@ void Dycore<NUM_DIM, FieldTemplate>::updateQuadPoints(int ti) {
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
-  double f, rho, T, w, a1;
+  double f, rho, T, w, a0, a1;
   vec::fixed<NUM_DIM> y, v, vi, a2;
   mat::fixed<NUM_DIM, NUM_DIM> a3;
   for (int pi = 0; pi < parcels[ti].size(); pi++) {
@@ -128,24 +128,39 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
     parcels[ti][pi].Mp.zeros();
     parcels[ti][pi].Fr.zeros();
     parcels[ti][pi].Mr.zeros();
-    parcels[ti][pi].Q = 0;
+    parcels[ti][pi].Qr = 0;
     for (int ni = 0; ni < parcels[ti][pi].numNeighbor; ni++) {
-      const Parcel<NUM_DIM> &neighbor = *parcels[ti][pi].neighbors[ni];
+      const Parcel<NUM_DIM> &neighbor1 = *parcels[ti][pi].neighbors[ni];
       for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
-        parcels[ti][pi].getBodyCoord(domain, quadPoints[ti][neighbor.id].x[qi], y);
+        parcels[ti][pi].getBodyCoord(domain, quadPoints[ti][neighbor1.id].x[qi], y);
         ShapeFunction<NUM_DIM>::eval(y, f);
         if (std::abs(f) < 1.0e-16) continue;
-        rho = quadPoints[ti][neighbor.id].rho[qi];
-        T = quadPoints[ti][neighbor.id].T[qi];
-        v = quadPoints[ti][neighbor.id].v[qi];
+        rho = quadPoints[ti][neighbor1.id].rho[qi];
+        T = quadPoints[ti][neighbor1.id].T[qi];
+        v = quadPoints[ti][neighbor1.id].v[qi];
         parcels[ti][pi].getLocalVelocity(y, vi);
         w = QuadPoints<NUM_DIM>::w[qi];
         // First part of pressure force
-        a1 = neighbor.m * w * (parcels[ti][pi].u - CV * T) / rho;
+        a1 = neighbor1.m * w * (parcels[ti][pi].u - CV * T) / rho;
         parcels[ti][pi].getShapeFunctionDerivatives(y, f, a2, a3);
         parcels[ti][pi].Fp -= a1 * a2;
         parcels[ti][pi].Mp -= a1 * a3;
         // Friction force
+        a1 = neighbor1.m * w * Rr * f / parcels[ti][pi].detH / rho;
+        a2 = vi - v;
+        parcels[ti][pi].Fr -= a1 * a2;
+        parcels[ti][pi].Mr -= a1 * a2 * y.t();
+        // Friction generated heat
+        a0 = 0;
+        for (int nj = 0; nj < parcels[ti][pi].numNeighbor; nj++) {
+          const Parcel<NUM_DIM> &neighbor2 = *parcels[ti][pi].neighbors[nj];
+          neighbor2.getBodyCoord(domain, quadPoints[ti][neighbor1.id].x[qi], y);
+          ShapeFunction<NUM_DIM>::eval(y, f);
+          if (std::abs(f) < 1.0e-16) continue;
+          neighbor2.getLocalVelocity(y, vi);
+          a0 += neighbor1.m * f / neighbor1.detH * dot(vi, vi) - rho * dot(v, v);
+        }
+        parcels[ti][pi].Qr += a1 / rho * a0;
       }
     }
     // Second part of pressure force
@@ -160,6 +175,9 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
     }
     parcels[ti][pi].Fp /= parcels[ti][pi].m;
     parcels[ti][pi].Mp /= parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
+    parcels[ti][pi].Fr /= 2 * parcels[ti][pi].m;
+    parcels[ti][pi].Mr /= 2 * parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
+    parcels[ti][pi].Qr /= 2 * parcels[ti][pi].m;
   }
 }
 

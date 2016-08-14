@@ -18,6 +18,7 @@ public:
   typedef RangeSearch<DomainMetric<DomainType>, mat, StandardCoverTree> SearchType;
 
 private:
+  const double Rr = 1;
   vector<Parcel<NUM_DIM>> parcels[2];
   vector<QuadPoints<NUM_DIM>> quadPoints[2];
   DomainType domain;
