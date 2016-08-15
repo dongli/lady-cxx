@@ -24,4 +24,20 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore should calculate parcel force
       REQUIRE(dycore.parcels[0][pi].Qr == Approx(0));
     }
   }
+  SECTION("use cylinder pressure") {
+    arma::vec::fixed<2> x0 = { 0.5, 0.5 };
+    for (int gi = 0; gi < dycore.mesh.numGrid(); gi++) {
+      auto x = dycore.mesh.gridCoord(gi);
+      if (norm(x - x0) < 0.25) {
+        p(gi) = 2;
+      } else {
+        p(gi) = 1;
+      }
+    }
+    T().fill(2);
+    dycore.inputData(p, T);
+    dycore.updateQuadPoints(0);
+    dycore.calcForces(0);
+    // TODO: How to test the result?
+  }
 }

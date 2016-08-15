@@ -28,6 +28,7 @@ private:
 
   FieldType p;
   FieldType T;
+  FieldType V[NUM_DIM];
   SearchType *meshSearch;
 
   int oldTi, newTi;
@@ -52,6 +53,8 @@ private:
   void regrid(int ti);
 
   void reorder(int ti);
+
+  void restart(int ti);
 };
 
 }
