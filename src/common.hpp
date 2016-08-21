@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <map>
+#include <string>
 #include <mlpack/core.hpp>
 #include <armadillo>
 #include <mlpack/core/tree/cover_tree.hpp>
@@ -16,6 +18,8 @@ using std::endl;
 using std::setw;
 using std::setprecision;
 using std::vector;
+using std::map;
+using std::string;
 using arma::uvec;
 using arma::vec;
 using arma::mat;

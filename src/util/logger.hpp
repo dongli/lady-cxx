@@ -16,42 +16,51 @@
 
 namespace lady { namespace logger {
 
-  using namespace boost::log;
+using namespace boost::log;
 
-  enum ErrorHandling { EXCEPTION, EXIT };
+enum ErrorHandling { EXCEPTION, EXIT };
 
-  enum SeverityLevel { DEBUG, NOTE, WARN, ERROR };
-  template< typename CharT, typename TraitsT >
-  inline std::basic_ostream<CharT, TraitsT>& operator<< (std::basic_ostream<CharT, TraitsT>& os, SeverityLevel lvl)
-  {
-    static const char* const str[] = { "DEBUG", "NOTE", "WARN", "ERROR" };
-    if (static_cast<std::size_t>(lvl) < (sizeof(str) / sizeof(*str)))
-      os << str[lvl];
-    else
-      os << static_cast<int>(lvl);
-    return os;
-  }
+enum SeverityLevel { DEBUG, NOTE, WARN, ERROR };
+template< typename CharT, typename TraitsT >
+inline std::basic_ostream<CharT, TraitsT>& operator<< (std::basic_ostream<CharT, TraitsT>& os, SeverityLevel lvl)
+{
+  static const char* const str[] = { "DEBUG", "NOTE", "WARN", "ERROR" };
+  if (static_cast<std::size_t>(lvl) < (sizeof(str) / sizeof(*str)))
+    os << str[lvl];
+  else
+    os << static_cast<int>(lvl);
+  return os;
+}
 
-  static sources::severity_logger<SeverityLevel> instance;
+static sources::severity_logger<SeverityLevel> instance;
 
-  void init();
+void init();
 
-  template <typename ValueType>
-  ValueType set_get_attr(const char *name, const ValueType &value) {
-    auto attr = attribute_cast<attributes::mutable_constant<ValueType>>(
-      core::get()->get_global_attributes()[name]
-    );
-    attr.set(value);
-    return attr.get();
-  }
+template <typename ValueType>
+ValueType set_get_attr(const char *name, const ValueType &value) {
+  auto attr = attribute_cast<attributes::mutable_constant<ValueType>>(
+    core::get()->get_global_attributes()[name]
+  );
+  attr.set(value);
+  return attr.get();
+}
 
-  std::string basename(const std::string &path);
+std::string basename(const std::string &path);
 
-  record_ostream& operator<<(record_ostream &os, const ErrorHandling &e);
+record_ostream& operator<<(record_ostream &os, const ErrorHandling &e);
+
 }}
 
 #define LOG_ERROR BOOST_LOG_SEV(lady::logger::instance, lady::logger::ERROR) \
-    << lady::logger::basename(__FILE__) << ":" << __LINE__ << ": "
+  << lady::logger::basename(__FILE__) << ":" << __LINE__ << ": "
+
+#define LOG_WARN BOOST_LOG_SEV(lady::logger::instance, lady::logger::WARN) \
+  << lady::logger::basename(__FILE__) << ":" << __LINE__ << ": "
+
+#define LOG_NOTE BOOST_LOG_SEV(lady::logger::instance, lady::logger::NOTE)
+
+#define LOG_DEBUG BOOST_LOG_SEV(lady::logger::instance, lady::logger::DEBUG) \
+  << lady::logger::basename(__FILE__) << ":" << __LINE__ << ": "
 
 #define THROW_EXCEPTION lady::logger::EXCEPTION
 #define EXIT lady::logger::EXIT

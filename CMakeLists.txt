@@ -12,7 +12,7 @@ link_directories ("$ENV{ARMADILLO_ROOT}/lib")
 
 set (BOOST_ROOT "$ENV{BOOST_ROOT}")
 add_definitions(-DBOOST_LOG_DYN_LINK=1)
-find_package (Boost 1.54.0 COMPONENTS log REQUIRED)
+find_package (Boost 1.54.0 COMPONENTS log date_time REQUIRED)
 include_directories ("${Boost_INCLUDE_DIRS}")
 
 set (lady_directories
