@@ -15,7 +15,9 @@
 
 using std::cout;
 using std::endl;
+using std::stringstream;
 using std::setw;
+using std::setfill;
 using std::setprecision;
 using std::vector;
 using std::map;
