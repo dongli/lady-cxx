@@ -1,0 +1,100 @@
+\documentclass[slidestop,compress,mathserif]{beamer}
+\usetheme{Antibes}
+\usecolortheme{spruce}
+\definecolor{main-color}{HTML}{005128}
+\setbeamertemplate{itemize item}{\color{main-color}$\blacktriangleright$}
+
+\title{Design of LADY v0.1.0}
+\author{Li Dong}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Rationale}
+\label{sec:Rationale}
+
+\begin{frame}
+
+\end{frame}
+
+\section{Discretization}
+\label{sec:Discretization}
+
+\begin{frame}
+  Mass density
+  \begin{equation}
+    \rho(\mathbf{x}) = \sum_{i = 1}^{N} m_i \psi_i(\mathbf{x})
+  \end{equation}
+\end{frame}
+
+\section{Barotropic model}
+\label{sec:Barotropic model}
+
+\begin{frame}
+  Notes on the model:
+  \begin{itemize}
+    \item No themodynamics process
+    \item Mass density is constant, $\rho$ is replaced by $h$ (height)
+    \item Incompressible in 3D, but compressible in 2D (height changes)
+  \end{itemize}
+  Geopotential energy:
+  \begin{equation}
+    E_p = \frac{1}{2} \int g h^2(\mathbf{x}) d\mathbf{x}
+    \label{eqn:geopotential-energy}
+  \end{equation}
+  \begin{exampleblock}{Recall}
+    \begin{equation*}
+      h(\mathbf{x}) = \sum_{i = 1}^{N} m_i \psi_i(\mathbf{x}).
+    \end{equation*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}
+  Momentum equations:
+  \begin{align}
+    \frac{d \mathbf{v}_i}{d t} & = {\mathbf{F}_p^{(g)}}_i \\
+    \frac{d \dot{\mathbf{H}}_i}{d t} & = {\mathbf{M}_p^{(g)}}_i
+  \end{align}
+  where ${\mathbf{F}_p^{(g)}}$ and ${\mathbf{M}_p^{(g)}}$ are pressure gradient forces induced by gravity and fluid continuity.
+\end{frame}
+
+\begin{frame}
+  \begin{align}
+    {\mathbf{F}_p^{(g)}}_i & = - \frac{1}{m_i} \frac{\partial E_p}{\partial \mathbf{x}_i}, \\
+    {\mathbf{M}_p^{(g)}}_i & = - \frac{1}{m_i J} \frac{\partial E_p}{\partial \mathbf{H}_i}.
+  \end{align}
+  Using quadrature points to approximate spatial integration in Eq. (\ref{eqn:geopotential-energy}):
+  \begin{equation}
+    E_p \approx \frac{1}{2} \sum_{j = 1}^{N} m_j \sum_{k = 1}^{n} w_k g h(\mathbf{x}_j^k).
+  \end{equation}
+  \begin{exampleblock}{Recall}
+    \begin{equation*}
+      \int{f(\mathbf{y}) \psi(\mathbf{y}) d\mathbf{y}} \approx \sum_{k = 1}^{n} w_k f(\mathbf{y}_k).
+    \end{equation*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}
+  \begin{equation*}
+    \frac{\partial E_p}{\partial \mathbf{x}_i} = {\frac{\partial E_p}{\partial \mathbf{x}_i}}^{(1)} + {\frac{\partial E_p}{\partial \mathbf{x}_i}}^{(2)}, \quad
+    \frac{\partial E_p}{\partial \mathbf{H}_i} = {\frac{\partial E_p}{\partial \mathbf{H}_i}}^{(1)} + {\frac{\partial E_p}{\partial \mathbf{H}_i}}^{(2)}
+  \end{equation*}
+  \begin{align}
+    {\frac{\partial E_p}{\partial \mathbf{x}_i}}^{(1)} & = \frac{1}{2} \sum_{j = 1}^{N} m_j \sum_{k = 1}^{n} w_k g m_i \left.\frac{\partial \psi_i}{\partial \mathbf{x}_i}\right|_{\mathbf{x}_j^k} \\
+    {\frac{\partial E_p}{\partial \mathbf{H}_i}}^{(1)} & = \frac{1}{2} \sum_{j = 1}^{N} m_j \sum_{k = 1}^{n} w_k g m_i \left.\frac{\partial \psi_i}{\partial \mathbf{H}_i}\right|_{\mathbf{x}_j^k} \\
+    {\frac{\partial E_p}{\partial \mathbf{x}_i}}^{(2)} & = \frac{1}{2} m_i \sum_{k = 1}^{n} w_k g m_i \left.\frac{\partial \psi_i}{\partial \mathbf{x}}\right|_{\mathbf{x}_j^k} \\
+    {\frac{\partial E_p}{\partial \mathbf{H}_i}}^{(2)} & = \frac{1}{2} m_i \sum_{k = 1}^{n} w_k g m_i \left.\frac{\partial \psi_i}{\partial \mathbf{x}}\right|_{\mathbf{x}_j^k} \mathbf{y}_k^T
+  \end{align}
+\end{frame}
+
+\section{Baroclinic model}
+\label{sec:Baroclinic model}
+
+\begin{frame}
+
+\end{frame}
+
+\end{document}
