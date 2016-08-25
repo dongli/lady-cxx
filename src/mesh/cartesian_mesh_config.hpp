@@ -8,6 +8,7 @@ namespace lady {
 template <int NUM_DIM>
 class CartesianMeshConfig : public StructuredMeshConfig<NUM_DIM> {
 public:
+  CartesianMeshConfig() {}
   CartesianMeshConfig(const DomainConfig<NUM_DIM> &domainConfig);
   virtual ~CartesianMeshConfig();
 };

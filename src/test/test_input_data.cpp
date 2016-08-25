@@ -5,8 +5,8 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore can be initialized with data"
   SECTION("use uniform data") {
     p().fill(1);
     T().fill(2);
-    dycore.inputData(p, T);
-    dycore.regrid(0);
+    dycore.inputBaroclinicData(p, T);
+    dycore.regridBaroclinicData(0);
     for (int gi = 0; gi < dycore.mesh.numGrid(); gi++) {
       REQUIRE(p(gi) == Approx(dycore.p(gi)));
       REQUIRE(T(gi) == Approx(dycore.T(gi)));

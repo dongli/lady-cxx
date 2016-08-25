@@ -15,6 +15,9 @@ add_definitions(-DBOOST_LOG_DYN_LINK=1)
 find_package (Boost 1.54.0 COMPONENTS log date_time REQUIRED)
 include_directories ("${Boost_INCLUDE_DIRS}")
 
+include_directories ("$ENV{NETCDF_ROOT}/include")
+link_directories ("$ENV{NETCDF_ROOT}/lib")
+
 set (lady_directories
   "${PROJECT_SOURCE_DIR}/src/util"
   "${PROJECT_SOURCE_DIR}/src/domain"
@@ -34,7 +37,7 @@ foreach (dir ${lady_directories})
 endforeach ()
 
 add_library (lady ${lady_headers} ${lady_sources})
-target_link_libraries (lady mlpack ${Boost_LIBRARIES})
+target_link_libraries (lady mlpack netcdf_c++4 netcdf ${Boost_LIBRARIES})
 
 set (test_directories
   "${PROJECT_SOURCE_DIR}/src/test"
@@ -54,5 +57,5 @@ include_directories ("${PROJECT_SOURCE_DIR}/src")
 add_executable (test_lady ${test_headers} ${test_sources})
 target_link_libraries (test_lady lady mlpack armadillo ${Boost_LIBRARIES})
 
-add_executable (plane_shallow_water "${PROJECT_SOURCE_DIR}/src/plane_shallow_water.cpp")
-target_link_libraries (plane_shallow_water lady mlpack armadillo ${Boost_LIBRARIES})
+add_executable (barotropic_driver "${PROJECT_SOURCE_DIR}/src/barotropic_driver.cpp")
+target_link_libraries (barotropic_driver lady mlpack armadillo ${Boost_LIBRARIES})

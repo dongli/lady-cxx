@@ -8,7 +8,7 @@
 namespace lady {
 
 template <int NUM_DIM>
-class CartesianMesh : public StructuredMesh<NUM_DIM> {
+class CartesianMesh : public StructuredMesh<NUM_DIM, CartesianMeshConfig> {
 public:
   typedef CartesianDomain<NUM_DIM> DomainType;
   template <int _NUM_DIM>
@@ -17,6 +17,12 @@ public:
 
   CartesianMesh();
   virtual ~CartesianMesh();
+
+  int numGridAlongX() const;
+
+  int numGridAlongY() const;
+
+  int numGridAlongZ() const;
 };
 
 }

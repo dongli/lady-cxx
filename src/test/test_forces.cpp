@@ -5,7 +5,7 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore should calculate parcel force
   SECTION("use uniform data") {
     p().fill(1);
     T().fill(2);
-    dycore.inputData(p, T);
+    dycore.inputBaroclinicData(p, T);
     dycore.updateQuadPoints(0);
     dycore.calcForces(0);
     for (int pi = 0; pi < dycore.parcels[0].size(); pi++) {
@@ -35,7 +35,7 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore should calculate parcel force
       }
     }
     T().fill(2);
-    dycore.inputData(p, T);
+    dycore.inputBaroclinicData(p, T);
     dycore.updateQuadPoints(0);
     dycore.calcForces(0);
     // TODO: How to test the result?

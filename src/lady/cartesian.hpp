@@ -2,6 +2,8 @@
 #define __LADY
 
 #include "util/logger.hpp"
+#include "util/alert.hpp"
+#include "util/time_manager.hpp"
 
 #include "domain/domain_config.hpp"
 #include "domain/cartesian_domain.hpp"

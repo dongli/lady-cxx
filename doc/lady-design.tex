@@ -28,6 +28,15 @@
   \begin{equation}
     \rho(\mathbf{x}) = \sum_{i = 1}^{N} m_i \psi_i(\mathbf{x})
   \end{equation}
+  Mass flux
+  \begin{equation}
+    \rho(\mathbf{x}) \mathbf{v}(\mathbf{x}) = \sum_{i = 1}^{N} m_i \psi_i(\mathbf{x}) \left[ \mathbf{v}_i + d\mathbf{H}_i \mathbf{H}_i^{-1}(\mathbf{x} - \mathbf{x}_i) \right]
+  \end{equation}
+  \begin{exampleblock}{Shape function and body coordinate}
+    \begin{equation*}
+      \psi_i(\mathbf{x}) = \frac{\psi(\mathbf{y})}{\det{\mathbf{H}}_i}\text{, where }\mathbf{y} = \mathbf{H}_i^{-1}(\mathbf{x} - \mathbf{x}_i))
+    \end{equation*}
+  \end{exampleblock}
 \end{frame}
 
 \section{Barotropic model}
@@ -45,7 +54,7 @@
     E_p = \frac{1}{2} \int g h^2(\mathbf{x}) d\mathbf{x}
     \label{eqn:geopotential-energy}
   \end{equation}
-  \begin{exampleblock}{Recall: Height is diagnosed from fluid continuity.}
+  \begin{exampleblock}{Height is diagnosed from fluid continuity.}
     \begin{equation*}
       h(\mathbf{x}) = \sum_{i = 1}^{N} m_i \psi_i(\mathbf{x}).
     \end{equation*}
@@ -59,21 +68,22 @@
     \frac{d \dot{\mathbf{H}}_i}{d t} & = {\mathbf{M}_p^{(g)}}_i
   \end{align}
   where ${\mathbf{F}_p^{(g)}}$ and ${\mathbf{M}_p^{(g)}}$ are pressure gradient forces induced by gravity and fluid continuity.
-\end{frame}
-
-\begin{frame}
   \begin{align}
     {\mathbf{F}_p^{(g)}}_i & = - \frac{1}{m_i} \frac{\partial E_p}{\partial \mathbf{x}_i}, \\
     {\mathbf{M}_p^{(g)}}_i & = - \frac{1}{m_i J} \frac{\partial E_p}{\partial \mathbf{H}_i}.
   \end{align}
+\end{frame}
+
+\begin{frame}
   Using quadrature points to approximate spatial integration in Eq. (\ref{eqn:geopotential-energy}):
   \begin{equation}
-    E_p \approx \frac{1}{2} \sum_{j = 1}^{N} m_j \sum_{k = 1}^{n} w_k g h(\mathbf{x}_j^k).
+    E_p = \frac{1}{2} \int g h^2(\mathbf{x}) d\mathbf{x} \approx \frac{1}{2} \sum_{j = 1}^{N} m_j \sum_{k = 1}^{n} w_k g h(\mathbf{x}_j^k).
   \end{equation}
-  \begin{exampleblock}{Recall}
+  \begin{exampleblock}{Replace continuous integration by discrete one}
     \begin{equation*}
-      \int{f(\mathbf{y}) \psi(\mathbf{y}) d\mathbf{y}} \approx \sum_{k = 1}^{n} w_k f(\mathbf{y}_k).
+      \int{f(\mathbf{y}) \psi(\mathbf{y}) d\mathbf{y}} \approx \sum_{k = 1}^{n} w_k f(\mathbf{y}_k),
     \end{equation*}
+    where $w_k$ is the quadrature point weight.
   \end{exampleblock}
 \end{frame}
 
@@ -95,6 +105,16 @@
 
 \begin{frame}
 
+\end{frame}
+
+\section{Temporal integrator}
+\label{sec:Temporal integrator}
+
+\begin{frame}
+  Leap frog scheme:
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{leap-frog-diagram.pdf}
+  \end{center}
 \end{frame}
 
 \end{document}

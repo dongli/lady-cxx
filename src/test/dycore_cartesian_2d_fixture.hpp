@@ -18,7 +18,7 @@ public:
     domainConfig.axisBoundaryTypes = { lady::PERIODIC, lady::PERIODIC };
     meshConfig.numGridAlongEachAxis[0] = 5;
     meshConfig.numGridAlongEachAxis[1] = 5;
-    dycore.init(meshConfig);
+    dycore.init(lady::BAROCLINIC, meshConfig);
 
     lady::CartesianFieldConfig<2> fieldConfig(meshConfig);
     fieldConfig.stagger = lady::CENTER;

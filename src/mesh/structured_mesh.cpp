@@ -1,23 +1,24 @@
 #include "structured_mesh.hpp"
+#include "cartesian_mesh_config.hpp"
 
 namespace lady {
 
-template class StructuredMesh<2>;
-template class StructuredMesh<3>;
+template class StructuredMesh<2, CartesianMeshConfig>;
+template class StructuredMesh<3, CartesianMeshConfig>;
 
-template <int NUM_DIM>
-StructuredMesh<NUM_DIM>::StructuredMesh() {
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
+StructuredMesh<NUM_DIM, MeshConfigTemplate>::StructuredMesh() {
 }
 
-template <int NUM_DIM>
-StructuredMesh<NUM_DIM>::~StructuredMesh() {
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
+StructuredMesh<NUM_DIM, MeshConfigTemplate>::~StructuredMesh() {
 
 }
 
-template <int NUM_DIM>
-void StructuredMesh<NUM_DIM>::init(const MeshConfig<NUM_DIM> &_meshConfig) {
-  auto &domainConfig = _meshConfig.domainConfig();
-  auto meshConfig = static_cast<const StructuredMeshConfig<NUM_DIM>&>(_meshConfig);
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
+void StructuredMesh<NUM_DIM, MeshConfigTemplate>::init(const MeshConfigType &meshConfig) {
+  Mesh<NUM_DIM, MeshConfigTemplate>::init(meshConfig);
+  auto &domainConfig = meshConfig.domainConfig();
   this->_gridCoords.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
   this->_gridSizes.set_size(NUM_DIM, prod(meshConfig.numGridAlongEachAxis));
   // FIXME: Parallel-note: Specify the space decomposition.

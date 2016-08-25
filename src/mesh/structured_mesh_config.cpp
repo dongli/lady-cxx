@@ -14,4 +14,11 @@ template <int NUM_DIM>
 StructuredMeshConfig<NUM_DIM>::~StructuredMeshConfig() {
 }
 
+template <int NUM_DIM>
+StructuredMeshConfig<NUM_DIM>& StructuredMeshConfig<NUM_DIM>::operator=(const StructuredMeshConfig<NUM_DIM> &other) {
+  if (this == &other) return *this;
+  MeshConfig<NUM_DIM>::operator=(other);
+  this->numGridAlongEachAxis = other.numGridAlongEachAxis;
+}
+
 }

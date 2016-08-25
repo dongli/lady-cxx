@@ -13,4 +13,19 @@ template <int NUM_DIM>
 CartesianMesh<NUM_DIM>::~CartesianMesh() {
 }
 
+template <int NUM_DIM>
+int CartesianMesh<NUM_DIM>::numGridAlongX() const {
+  return this->meshConfig.numGridAlongEachAxis[0];
+}
+
+template <int NUM_DIM>
+int CartesianMesh<NUM_DIM>::numGridAlongY() const {
+  return this->meshConfig.numGridAlongEachAxis[1];
+}
+
+template <int NUM_DIM>
+int CartesianMesh<NUM_DIM>::numGridAlongZ() const {
+  return this->meshConfig.numGridAlongEachAxis[2];
+}
+
 }

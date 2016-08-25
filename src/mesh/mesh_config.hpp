@@ -10,6 +10,7 @@ class MeshConfig {
 protected:
   const DomainConfig<NUM_DIM> *_domainConfig;
 public:
+  MeshConfig() {}
   MeshConfig(const DomainConfig<NUM_DIM> &domainConfig) {
     _domainConfig = &domainConfig;
   }
@@ -18,6 +19,8 @@ public:
   const DomainConfig<NUM_DIM>& domainConfig() const {
     return *_domainConfig;
   }
+
+  MeshConfig<NUM_DIM>& operator=(const MeshConfig<NUM_DIM> &other);
 };
 
 }

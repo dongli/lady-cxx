@@ -9,6 +9,10 @@
 
 namespace lady {
 
+enum DycoreMode {
+  BAROTROPIC, BAROCLINIC
+};
+
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 class Dycore {
 public:
@@ -18,7 +22,9 @@ public:
   typedef RangeSearch<DomainMetric<DomainType>, mat, StandardCoverTree> SearchType;
 
 private:
-  const double Rr = 1;
+  DycoreMode mode;
+  double Rr;
+
   vector<Parcel<NUM_DIM>> parcels[2];
   vector<QuadPoints<NUM_DIM>> quadPoints[2];
   DomainType domain;
@@ -26,10 +32,15 @@ private:
   mat parcelCentroids;
   SearchType *neighborSearch;
 
-  FieldType p;
-  FieldType T;
   FieldType V[NUM_DIM];
   SearchType *meshSearch;
+
+  // For BAROTROPIC mode
+  FieldType h;
+
+  // For BAROCLINIC mode
+  FieldType p;
+  FieldType T;
 
   int oldTi, newTi;
 
@@ -37,11 +48,15 @@ public:
   Dycore();
   ~Dycore();
 
-  void init(const typename MeshType::MeshConfigType &meshConfig);
+  void init(const DycoreMode mode, const typename MeshType::MeshConfigType &meshConfig);
 
-  void inputData(const FieldType &p, const FieldType &T);
+  void inputBarotropicData(const FieldType &h, const FieldType &u, const FieldType &v);
+
+  void inputBaroclinicData(const FieldType &p, const FieldType &T);
 
   void run();
+
+  void output(int ti) const;
 
 private:
   void findNeighbors(int ti);
@@ -50,7 +65,11 @@ private:
 
   void calcForces(int ti);
 
-  void regrid(int ti);
+  void calcHeats(int ti);
+
+  void regridBarotropicData(int ti);
+
+  void regridBaroclinicData(int ti);
 
   void reorder(int ti);
 

@@ -6,16 +6,19 @@
 
 namespace lady {
 
-template <int NUM_DIM>
+template <int NUM_DIM, template <int ...> class MeshConfigTemplate>
 class Mesh {
+public:
+  typedef MeshConfigTemplate<NUM_DIM> MeshConfigType;
 protected:
   mat _gridCoords;
   mat _gridSizes;
+  MeshConfigType meshConfig;
 public:
   Mesh();
   virtual ~Mesh();
 
-  virtual void init(const MeshConfig<NUM_DIM> &meshConfig) = 0;
+  virtual void init(const MeshConfigType &meshConfig);
 
   int numGrid() const { return _gridCoords.n_cols; }
 
