@@ -18,7 +18,7 @@ public:
   static ptime currTime;
   static ptime endTime;
   static time_duration timeStepSize;
-  static long timeStep;
+  static long unsigned int timeStep;
   static map<string, Alert> alerts;
 
   static void init(const TimeConfig &timeConfig);
@@ -27,11 +27,15 @@ public:
 
   static void advance();
 
+  static double elapsedSeconds();
+
   static void printTime();
 
   static void setAlert(const string &name, const string &freq);
 
   static const Alert& alert(const string &name);
+
+  static string startTimeToString();
 
   static string currTimeToString();
 

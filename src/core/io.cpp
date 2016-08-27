@@ -73,12 +73,30 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
   NcVar xVar = file.addVar("x", ncFloat, xDim);
   NcVar yVar = file.addVar("y", ncFloat, yDim);
 
+  format timeUnits("seconds since %1%");
+  timeUnits % TimeManager::startTimeToString();
+  timeVar.putAtt("units", timeUnits.str());
+
   NcVar hVar = file.addVar("h", ncFloat, {timeDim, yDim, xDim});
   NcVar uVar = file.addVar("u", ncFloat, {timeDim, yDim, xDim});
   NcVar vVar = file.addVar("v", ncFloat, {timeDim, yDim, xDim});
 
-  double *data = new double[mesh.numGrid()];
+  float *data = new float[mesh.numGrid()];
   int k;
+  vector<size_t> start, count;
+
+  start = { TimeManager::timeStep };
+  count = { 1 };
+
+  data[0] = TimeManager::elapsedSeconds();
+  timeVar.putVar(start, count, data);
+
+  start = { TimeManager::timeStep, 0, 0 };
+  count = {
+    1,
+    static_cast<long unsigned int>(mesh.numGridAlongY()),
+    static_cast<long unsigned int>(mesh.numGridAlongX())
+  };
 
   k = 0;
   for (int j = 0; j < mesh.numGridAlongX(); j++) {
@@ -86,7 +104,7 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
       data[k++] = h(i, j);
     }
   }
-  hVar.putVar(data);
+  hVar.putVar(start, count, data);
 
   k = 0;
   for (int j = 0; j < mesh.numGridAlongX(); j++) {
@@ -94,7 +112,7 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
       data[k++] = u(i, j);
     }
   }
-  uVar.putVar(data);
+  uVar.putVar(start, count, data);
 
   k = 0;
   for (int j = 0; j < mesh.numGridAlongX(); j++) {
@@ -102,7 +120,7 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
       data[k++] = v(i, j);
     }
   }
-  vVar.putVar(data);
+  vVar.putVar(start, count, data);
 
   delete [] data;
 }

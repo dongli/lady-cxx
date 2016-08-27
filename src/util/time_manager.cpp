@@ -6,7 +6,7 @@ ptime TimeManager::startTime;
 ptime TimeManager::currTime;
 ptime TimeManager::endTime;
 time_duration TimeManager::timeStepSize;
-long TimeManager::timeStep;
+long unsigned int TimeManager::timeStep;
 map<string, Alert> TimeManager::alerts;
 time_facet* TimeManager::facet;
 stringstream TimeManager::stream;
@@ -38,6 +38,11 @@ void TimeManager::advance() {
   timeStep++;
 }
 
+double TimeManager::elapsedSeconds() {
+  auto diff = currTime - startTime;
+  return diff.seconds();
+}
+
 void TimeManager::printTime() {
   LOG_NOTE << ">>> " << currTime << " <<<";
 }
@@ -57,6 +62,12 @@ const Alert& TimeManager::alert(const string &name) {
     LOG_ERROR << "No alert \"" << name << "\" is found!";
   }
   return res->second;
+}
+
+string TimeManager::startTimeToString() {
+  stream.str("");
+  stream << startTime;
+  return stream.str();
 }
 
 string TimeManager::currTimeToString() {
