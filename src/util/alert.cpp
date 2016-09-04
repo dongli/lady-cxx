@@ -9,6 +9,12 @@ Alert::Alert(const string &name, const string &freq) {
   this->nextOnTime = TimeManager::startTime + this->freq;
 }
 
+Alert::Alert(const string &name, const time_duration &freq) {
+  this->name = name;
+  this->freq = freq;
+  this->nextOnTime = TimeManager::startTime + this->freq;
+}
+
 Alert::~Alert() {
 }
 

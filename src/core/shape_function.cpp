@@ -55,6 +55,7 @@ void ShapeFunction<NUM_DIM>::diff(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_D
   df.ones();
   for (int i = 0; i < y.size(); ++i) {
     for (int j = 0; j < y.size(); ++j) {
+      if (df[i] == 0.0) continue;
       if (i == j) {
         if (-1.0 <= y[j] && y[j] <= -0.5) {
             df[i] *= 6.0 * pow(1.0 + y[j], 2.0);
@@ -66,7 +67,6 @@ void ShapeFunction<NUM_DIM>::diff(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_D
             df[i] *= -6.0 * pow(1.0 - y[j], 2.0);
         } else {
             df[i] = 0.0;
-            continue;
         }
       } else {
         if (-1.0 <= y[j] && y[j] <= -0.5) {
@@ -74,12 +74,11 @@ void ShapeFunction<NUM_DIM>::diff(const vec::fixed<NUM_DIM> &y, vec::fixed<NUM_D
         } else if (-0.5 <= y[j] && y[j] <= 0.0) {
           df[i] *= 1.0 - 6.0 * pow(y[j], 2.0) * (1.0 + y[j]);
         } else if (0.0 <= y[j] && y[j] <= 0.5) {
-          df[i] *= 1.0 - 6.0 * pow(y[j], 2.0) * (1.0-y[j]);
+          df[i] *= 1.0 - 6.0 * pow(y[j], 2.0) * (1.0 - y[j]);
         } else if (0.5 <= y[j] && y[j] <= 1.0) {
           df[i] *= 2.0 * pow(1.0 - y[j], 3.0);
         } else {
           df[i] = 0.0;
-          continue;
         }
       }
     }

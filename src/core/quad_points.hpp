@@ -19,7 +19,7 @@ public:
   vec rho;
   vec T;
 
-  static int num;
+  static size_t num;
 
   QuadPoints();
   ~QuadPoints();

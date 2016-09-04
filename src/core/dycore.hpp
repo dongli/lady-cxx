@@ -27,8 +27,8 @@ private:
 
   vector<Parcel<NUM_DIM>> parcels[2];
   vector<QuadPoints<NUM_DIM>> quadPoints[2];
-  DomainType domain;
-  MeshType mesh;
+  DomainType _domain;
+  MeshType _mesh;
   mat parcelCentroids;
   SearchType *neighborSearch;
 
@@ -56,7 +56,11 @@ public:
 
   void run();
 
-  void output(int ti) const;
+  void output();
+
+  const DomainType& domain() const { return _domain; }
+
+  const MeshType& mesh() const { return _mesh; }
 
 private:
   void findNeighbors(int ti);

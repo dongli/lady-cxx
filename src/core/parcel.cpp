@@ -38,7 +38,7 @@ template <int NUM_DIM>
 void Parcel<NUM_DIM>::getShapeFunctionDerivatives(const vec::fixed<NUM_DIM> &y, double f, vec::fixed<NUM_DIM> &dfdxi, mat::fixed<NUM_DIM, NUM_DIM> &dfdHi) const {
   ShapeFunction<NUM_DIM>::diff(y, dfdxi);
   dfdxi = - invH.t() * dfdxi / detH;
-  dfdHi = dfdxi * y.t() - f * invH.t();
+  dfdHi = dfdxi * y.t() - f / detH * invH.t();
 }
 
 template <int NUM_DIM>

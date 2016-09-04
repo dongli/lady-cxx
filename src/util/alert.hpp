@@ -16,6 +16,7 @@ private:
 public:
   Alert() {}
   Alert(const string &name, const string &freq);
+  Alert(const string &name, const time_duration &freq);
   ~Alert();
 
   void update();

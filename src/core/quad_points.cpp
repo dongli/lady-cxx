@@ -15,7 +15,7 @@ vec QuadPoints<NUM_DIM>::w;
 template <int NUM_DIM>
 vec QuadPoints<NUM_DIM>::f;
 template <int NUM_DIM>
-int QuadPoints<NUM_DIM>::num;
+size_t QuadPoints<NUM_DIM>::num;
 
 template <int NUM_DIM>
 QuadPoints<NUM_DIM>::QuadPoints() {

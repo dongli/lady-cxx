@@ -3,6 +3,7 @@
 
 TEST_CASE_METHOD(DycoreCartesian2dFixture, "initialize quadrature points", "[Dycore]") {
   SECTION("set static variables") {
+    dycore.updateQuadPoints(0);
     int qi = 0;
     for (int j = 0; j < lady::ShapeFunction<2>::nodes.size(); j++) {
       for (int i = 0; i < lady::ShapeFunction<2>::nodes.size(); i++) {

@@ -18,11 +18,15 @@ public:
   CartesianMesh();
   virtual ~CartesianMesh();
 
-  int numGridAlongX() const;
+  size_t numGridAlongX() const;
 
-  int numGridAlongY() const;
+  size_t numGridAlongY() const;
 
-  int numGridAlongZ() const;
+  size_t numGridAlongZ() const;
+
+  double x(int i) const;
+
+  double y(int j) const;
 };
 
 }

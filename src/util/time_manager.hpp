@@ -23,6 +23,8 @@ public:
 
   static void init(const TimeConfig &timeConfig);
 
+  static bool isFirstStep();
+
   static bool isFinished();
 
   static void advance();
@@ -32,6 +34,8 @@ public:
   static void printTime();
 
   static void setAlert(const string &name, const string &freq);
+
+  static void setAlert(const string &name, const time_duration &freq);
 
   static const Alert& alert(const string &name);
 

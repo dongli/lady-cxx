@@ -26,8 +26,8 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore should calculate parcel force
   }
   SECTION("use cylinder pressure") {
     arma::vec::fixed<2> x0 = { 0.5, 0.5 };
-    for (int gi = 0; gi < dycore.mesh.numGrid(); gi++) {
-      auto x = dycore.mesh.gridCoord(gi);
+    for (size_t gi = 0; gi < dycore.mesh().numGrid(); gi++) {
+      auto x = dycore.mesh().gridCoord(gi);
       if (norm(x - x0) < 0.25) {
         p(gi) = 2;
       } else {

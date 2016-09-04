@@ -7,7 +7,10 @@ TEST_CASE_METHOD(DycoreCartesian2dFixture, "dycore can be initialized with data"
     T().fill(2);
     dycore.inputBaroclinicData(p, T);
     dycore.regridBaroclinicData(0);
-    for (int gi = 0; gi < dycore.mesh.numGrid(); gi++) {
+    for (size_t pi = 0; pi < dycore.parcels[0].size(); pi++) {
+      REQUIRE(dycore.parcels[0][pi].m > 0);
+    }
+    for (int gi = 0; gi < dycore.mesh().numGrid(); gi++) {
       REQUIRE(p(gi) == Approx(dycore.p(gi)));
       REQUIRE(T(gi) == Approx(dycore.T(gi)));
     }

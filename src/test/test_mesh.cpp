@@ -12,13 +12,13 @@ TEST_CASE("cartesian mesh should be initialised with even grids", "[StructuredMe
 
     domainConfig.axisStartCoords = { 0, 0 };
     domainConfig.axisEndCoords = { 1, 1 };
-    meshConfig.numGridAlongEachAxis = { 10, 10 };
+    meshConfig.numGridAlongEachAxis = { 10, 20 };
     mesh.init(meshConfig);
 
     REQUIRE(mesh.numGridAlongX() == 10);
-    REQUIRE(mesh.numGridAlongY() == 10);
+    REQUIRE(mesh.numGridAlongY() == 20);
 
-    double dx = 0.1, dy = 0.1;
+    double dx = 0.1, dy = 0.05;
     int l = 0;
     for (int j = 0; j < mesh.numGridAlongY(); j++) {
       for (int i = 0; i < mesh.numGridAlongX(); i++) {
@@ -26,6 +26,13 @@ TEST_CASE("cartesian mesh should be initialised with even grids", "[StructuredMe
         REQUIRE(mesh.gridCoord(l)[1] == dy * (j + 0.5));
         l++;
       }
+    }
+
+    for (size_t i = 0; i < mesh.numGridAlongX(); i++) {
+      REQUIRE(mesh.x(i) == dx * (i + 0.5));
+    }
+    for (size_t j = 0; j < mesh.numGridAlongY(); j++) {
+      REQUIRE(mesh.y(j) == dy * (j + 0.5));
     }
   }
   SECTION("should work in 3D") {

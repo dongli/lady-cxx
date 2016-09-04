@@ -30,45 +30,40 @@ void Dycore<NUM_DIM, FieldTemplate>::init(const DycoreMode mode, const typename 
 
   ShapeFunction<NUM_DIM>::init();
   QuadPoints<NUM_DIM>::init();
-  domain.init(meshConfig.domainConfig());
-  mesh.init(meshConfig);
-  meshSearch = new SearchType(mesh.gridCoords(), true);
-  IO<NUM_DIM, FieldTemplate>::init("lady.%1%.nc");
+  _domain.init(meshConfig.domainConfig());
+  _mesh.init(meshConfig);
+  meshSearch = new SearchType(_mesh.gridCoords(), true);
+  IO<NUM_DIM, FieldTemplate>::init("lady", TimeManager::timeStepSize);
 
   for (int ti = 0; ti < 2; ti++) {
-    parcels[ti].resize(mesh.numGrid());
+    parcels[ti].resize(_mesh.numGrid());
     quadPoints[ti].resize(parcels[ti].size());
-    for (int pi = 0; pi < mesh.numGrid(); pi++) {
-      parcels[ti][pi].init(pi, mesh.gridCoord(pi), mesh.gridSize(pi));
+    for (int pi = 0; pi < _mesh.numGrid(); pi++) {
+      parcels[ti][pi].init(pi, _mesh.gridCoord(pi), _mesh.gridSize(pi));
       quadPoints[ti][pi].init(&parcels[ti][pi]);
     }
   }
-  parcelCentroids.set_size(NUM_DIM, mesh.numGrid());
+  parcelCentroids.set_size(NUM_DIM, _mesh.numGrid());
   neighborSearch = new SearchType(false, true);
   oldTi = 0;
   newTi = 1;
-  // Find neighbors of parcels.
   findNeighbors(oldTi);
-  // Update quadrature points.
-  updateQuadPoints(oldTi);
-  // Calculate forces acted on parcels.
-  calcForces(oldTi);
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::inputBarotropicData(const FieldType &h, const FieldType &u, const FieldType &v) {
-  sp_mat A(mesh.numGrid(), mesh.numGrid());
-  vec b1(mesh.numGrid()), b2(mesh.numGrid()), b3(mesh.numGrid());
-  vec x1(mesh.numGrid()), x2(mesh.numGrid()), x3(mesh.numGrid());
+  sp_mat A(_mesh.numGrid(), _mesh.numGrid());
+  vec b1(_mesh.numGrid()), b2(_mesh.numGrid()), b3(_mesh.numGrid());
+  vec x1(_mesh.numGrid()), x2(_mesh.numGrid()), x3(_mesh.numGrid());
   vec::fixed<NUM_DIM> y;
   double f;
-  for (int pi = 0; pi < mesh.numGrid(); pi++) {
+  for (int pi = 0; pi < _mesh.numGrid(); pi++) {
     b1(pi) = h(pi);
     b2(pi) = h(pi) * u(pi);
     b3(pi) = h(pi) * v(pi);
     for (int ni = 0; ni < parcels[0][pi].numNeighbor; ni++) {
       const Parcel<NUM_DIM> &neighbor = *parcels[0][pi].neighbors[ni];
-      parcels[0][pi].getBodyCoord(domain, neighbor.x, y);
+      parcels[0][pi].getBodyCoord(_domain, neighbor.x, y);
       ShapeFunction<NUM_DIM>::eval(y, f);
       if (std::abs(f) < 1.0e-16) continue;
       A(pi, neighbor.id) = f / parcels[0][pi].detH;
@@ -78,8 +73,9 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBarotropicData(const FieldType &h, con
   spsolve(x1, A, b1);
   spsolve(x2, A, b2);
   spsolve(x3, A, b3);
-  for (int pi = 0; pi < mesh.numGrid(); pi++) {
+  for (int pi = 0; pi < _mesh.numGrid(); pi++) {
     parcels[0][pi].m = x1[pi];
+    parcels[1][pi].m = parcels[0][pi].m;
     parcels[0][pi].v[0] = x2[pi] / x1[pi];
     parcels[0][pi].v[1] = x3[pi] / x1[pi];
     parcels[0][pi].dH.zeros();
@@ -91,17 +87,17 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBarotropicData(const FieldType &h, con
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::inputBaroclinicData(const FieldType &p, const FieldType &T) {
-  sp_mat A(mesh.numGrid(), mesh.numGrid());
-  vec b1(mesh.numGrid()), b2(mesh.numGrid());
-  vec x1(mesh.numGrid()), x2(mesh.numGrid());
+  sp_mat A(_mesh.numGrid(), _mesh.numGrid());
+  vec b1(_mesh.numGrid()), b2(_mesh.numGrid());
+  vec x1(_mesh.numGrid()), x2(_mesh.numGrid());
   vec::fixed<NUM_DIM> y;
   double f;
-  for (int pi = 0; pi < mesh.numGrid(); pi++) {
+  for (int pi = 0; pi < _mesh.numGrid(); pi++) {
     b1(pi) = p(pi) * CV / RD;
     b2(pi) = p(pi) / T(pi) / RD;
     for (int ni = 0; ni < parcels[0][pi].numNeighbor; ni++) {
       const Parcel<NUM_DIM> &neighbor = *parcels[0][pi].neighbors[ni];
-      parcels[0][pi].getBodyCoord(domain, neighbor.x, y);
+      parcels[0][pi].getBodyCoord(_domain, neighbor.x, y);
       ShapeFunction<NUM_DIM>::eval(y, f);
       if (std::abs(f) < 1.0e-16) continue;
       A(pi, neighbor.id) = f / parcels[0][pi].detH;
@@ -110,8 +106,9 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBaroclinicData(const FieldType &p, con
   }
   spsolve(x1, A, b1);
   spsolve(x2, A, b2);
-  for (int pi = 0; pi < mesh.numGrid(); pi++) {
+  for (int pi = 0; pi < _mesh.numGrid(); pi++) {
     parcels[0][pi].m = x2[pi];
+    parcels[1][pi].m = parcels[0][pi].m;
     parcels[0][pi].u = x1[pi] / x2[pi];
     // TODO: Set initial velocity.
     parcels[0][pi].v.zeros();
@@ -124,13 +121,18 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBaroclinicData(const FieldType &p, con
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::run() {
-  double dt = TimeManager::timeStepSize.seconds();
+  double dt = TimeManager::timeStepSize.total_milliseconds() * 1.0e-3;
+  if (TimeManager::isFirstStep()) {
+    updateQuadPoints(oldTi);
+    calcForces(oldTi);
+  }
   // Integrate in time direction.
   for (int pi = 0; pi < parcels[newTi].size(); pi++) {  // TODO: What about if parcels are inserted or removed dynamically?
     parcels[newTi][pi].v  = parcels[oldTi][pi].v  + 0.5 * dt * (parcels[oldTi][pi].Fp + parcels[oldTi][pi].Fr);
     parcels[newTi][pi].dH = parcels[oldTi][pi].dH + 0.5 * dt * (parcels[oldTi][pi].Mp + parcels[oldTi][pi].Mr);
-    parcels[newTi][pi].x  = parcels[oldTi][pi].x  + dt * parcels[newTi][pi].v;
+    parcels[newTi][pi].x  = _domain.addCoord(parcels[oldTi][pi].x, dt * parcels[newTi][pi].v);
     parcels[newTi][pi].H  = parcels[oldTi][pi].H  + dt * parcels[newTi][pi].dH;
+    parcels[newTi][pi].afterMatrixChanged();
     parcels[oldTi][pi].v  = parcels[newTi][pi].v;
     parcels[oldTi][pi].dH = parcels[newTi][pi].dH;
   }
@@ -140,7 +142,7 @@ void Dycore<NUM_DIM, FieldTemplate>::run() {
       parcels[newTi][pi].u = parcels[oldTi][pi].u;
       for (int iter = 0; iter < 2; iter++) {
         calcHeats(newTi);
-        parcels[newTi][pi].u = parcels[oldTi][pi].u + 0.5 * dt * (parcels[oldTi][pi].Qr + parcels[oldTi][pi].Qr);
+        parcels[newTi][pi].u = parcels[oldTi][pi].u + 0.5 * dt * (parcels[oldTi][pi].Qr + parcels[newTi][pi].Qr);
       }
     }
   }
@@ -155,14 +157,19 @@ void Dycore<NUM_DIM, FieldTemplate>::run() {
     parcels[newTi][pi].v  += 0.5 * dt * (parcels[newTi][pi].Fp + parcels[newTi][pi].Fr);
     parcels[newTi][pi].dH += 0.5 * dt * (parcels[newTi][pi].Mp + parcels[newTi][pi].Mr);
   }
+  if (mode == BAROTROPIC) {
+    regridBarotropicData(newTi);
+  } else if (mode == BAROCLINIC) {
+    regridBaroclinicData(newTi);
+  }
   // Switch time indices.
   int ti = oldTi; oldTi = newTi; newTi = ti;
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void Dycore<NUM_DIM, FieldTemplate>::output(int ti) const {
+void Dycore<NUM_DIM, FieldTemplate>::output() {
   if (mode == BAROTROPIC) {
-    IO<NUM_DIM, FieldTemplate>::outputBarotropicData(domain, mesh, h, V[0], V[1]);
+    IO<NUM_DIM, FieldTemplate>::outputBarotropicData(_domain, _mesh, h, V[0], V[1]);
   }
 }
 
@@ -196,7 +203,7 @@ void Dycore<NUM_DIM, FieldTemplate>::findNeighbors(int ti) {
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::updateQuadPoints(int ti) {
   for (int pi = 0; pi < parcels[ti].size(); pi++) {
-    quadPoints[ti][pi].update(domain);
+    quadPoints[ti][pi].update(_domain);
   }
 }
 
@@ -211,7 +218,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
     for (int ni = 0; ni < parcels[ti][pi].numNeighbor; ni++) {
       const Parcel<NUM_DIM> &neighbor = *parcels[ti][pi].neighbors[ni];
       for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
-        parcels[ti][pi].getBodyCoord(domain, quadPoints[ti][neighbor.id].x[qi], y);
+        parcels[ti][pi].getBodyCoord(_domain, quadPoints[ti][neighbor.id].x[qi], y);
         ShapeFunction<NUM_DIM>::eval(y, f);
         if (std::abs(f) < 1.0e-16) continue;
         rho = quadPoints[ti][neighbor.id].rho[qi];
@@ -222,7 +229,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
         // First part of pressure force
         switch (mode) {
           case BAROTROPIC:
-            a1 = neighbor.m * w * G;
+            a1 = neighbor.m * w * G * 0.5;
             break;
           case BAROCLINIC:
             a1 = neighbor.m * w * (parcels[ti][pi].u - CV * T) / rho;
@@ -232,10 +239,12 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
         parcels[ti][pi].Fp -= a1 * a2;
         parcels[ti][pi].Mp -= a1 * a3;
         // Friction force
-        a1 = neighbor.m * w * Rr * f / parcels[ti][pi].detH / rho;
-        a2 = vi - v;
-        parcels[ti][pi].Fr -= a1 * a2;
-        parcels[ti][pi].Mr -= a1 * a2 * y.t();
+        if (mode == BAROCLINIC) {
+          a1 = neighbor.m * w * Rr * f / parcels[ti][pi].detH / rho;
+          a2 = vi - v;
+          parcels[ti][pi].Fr -= a1 * a2;
+          parcels[ti][pi].Mr -= a1 * a2 * y.t();
+        }
       }
     }
     // Second part of pressure force
@@ -246,7 +255,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
       w = QuadPoints<NUM_DIM>::w[qi];
       switch (mode) {
         case BAROTROPIC:
-          a1 = parcels[ti][pi].m * w * G;
+          a1 = parcels[ti][pi].m * w * G * 0.5;
           break;
         case BAROCLINIC:
           a1 = parcels[ti][pi].m * w * (parcels[ti][pi].u - CV * T) / rho;
@@ -270,7 +279,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcHeats(int ti) {
     for (int ni = 0; ni < parcels[ti][pi].numNeighbor; ni++) {
       const Parcel<NUM_DIM> &neighbor1 = *parcels[ti][pi].neighbors[ni];
       for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
-        parcels[ti][pi].getBodyCoord(domain, quadPoints[ti][neighbor1.id].x[qi], y);
+        parcels[ti][pi].getBodyCoord(_domain, quadPoints[ti][neighbor1.id].x[qi], y);
         ShapeFunction<NUM_DIM>::eval(y, f);
         if (std::abs(f) < 1.0e-16) continue;
         rho = quadPoints[ti][neighbor1.id].rho[qi];
@@ -281,7 +290,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcHeats(int ti) {
         a2 = 0;
         for (int nj = 0; nj < parcels[ti][pi].numNeighbor; nj++) {
           const Parcel<NUM_DIM> &neighbor2 = *parcels[ti][pi].neighbors[nj];
-          neighbor2.getBodyCoord(domain, quadPoints[ti][neighbor1.id].x[qi], y);
+          neighbor2.getBodyCoord(_domain, quadPoints[ti][neighbor1.id].x[qi], y);
           ShapeFunction<NUM_DIM>::eval(y, f);
           if (std::abs(f) < 1.0e-16) continue;
           neighbor2.getLocalVelocity(y, vi);
@@ -308,7 +317,7 @@ void Dycore<NUM_DIM, FieldTemplate>::regridBarotropicData(int ti) {
     meshSearch->Search(parcels[ti][pi].x, r, neighbors, distances);
     for (int ni = 0; ni < neighbors[0].size(); ni++) {
       int gi = neighbors[0][ni];
-      parcels[ti][pi].getBodyCoord(domain, mesh.gridCoord(gi), y);
+      parcels[ti][pi].getBodyCoord(_domain, _mesh.gridCoord(gi), y);
       ShapeFunction<NUM_DIM>::eval(y, f);
       if (std::abs(f) < 1.0e-16) continue;
       parcels[ti][pi].getLocalVelocity(y, v);
@@ -318,7 +327,7 @@ void Dycore<NUM_DIM, FieldTemplate>::regridBarotropicData(int ti) {
       V[1](gi) += tmp * v[1];
     }
   }
-  for (int gi = 0; gi < mesh.numGrid(); gi++) {
+  for (int gi = 0; gi < _mesh.numGrid(); gi++) {
     V[0](gi) /= h(gi);
     V[1](gi) /= h(gi);
   }
@@ -338,7 +347,7 @@ void Dycore<NUM_DIM, FieldTemplate>::regridBaroclinicData(int ti) {
     meshSearch->Search(parcels[ti][pi].x, r, neighbors, distances);
     for (int ni = 0; ni < neighbors[0].size(); ni++) {
       int gi = neighbors[0][ni];
-      parcels[ti][pi].getBodyCoord(domain, mesh.gridCoord(gi), y);
+      parcels[ti][pi].getBodyCoord(_domain, _mesh.gridCoord(gi), y);
       ShapeFunction<NUM_DIM>::eval(y, f);
       if (std::abs(f) < 1.0e-16) continue;
       tmp = f / parcels[ti][pi].detH * parcels[ti][pi].m;
@@ -346,7 +355,7 @@ void Dycore<NUM_DIM, FieldTemplate>::regridBaroclinicData(int ti) {
       T(gi) += tmp * parcels[ti][pi].u;
     }
   }
-  for (int gi = 0; gi < mesh.numGrid(); gi++) {
+  for (int gi = 0; gi < _mesh.numGrid(); gi++) {
     T(gi) = T(gi) / p(gi) / CV;
     p(gi) = p(gi) * T(gi) * RD;
   }
