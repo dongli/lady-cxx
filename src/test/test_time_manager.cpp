@@ -42,7 +42,7 @@ TEST_CASE("set alerts", "[TimeManager]") {
   boost::posix_time::ptime refTime = lady::TimeManager::startTime;
   while (!lady::TimeManager::isFinished()) {
     boost::posix_time::time_duration diffTime = lady::TimeManager::currTime - refTime;
-    if (diffTime.minutes() == 5) {
+    if (diffTime.minutes() == 5 || diffTime.minutes() == 0) {
       REQUIRE(lady::TimeManager::alert("test").isOn() == true);
       refTime = lady::TimeManager::currTime;
     } else {

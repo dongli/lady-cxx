@@ -6,13 +6,13 @@ namespace lady {
 Alert::Alert(const string &name, const string &freq) {
   this->name = name;
   this->freq = duration_from_string(freq);
-  this->nextOnTime = TimeManager::startTime + this->freq;
+  this->nextOnTime = TimeManager::startTime;
 }
 
 Alert::Alert(const string &name, const time_duration &freq) {
   this->name = name;
   this->freq = freq;
-  this->nextOnTime = TimeManager::startTime + this->freq;
+  this->nextOnTime = TimeManager::startTime;
 }
 
 Alert::~Alert() {

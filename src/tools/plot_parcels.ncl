@@ -29,7 +29,7 @@ begin
   num_shape_point = 20
   x = new((/num_shape_point,2/), float)
   dtheta = 2 * atan(1.0) * 4 / (num_shape_point-1)
-  do ti = 0, dimsizes(file_names)-1, 5
+  do ti = 0, dimsizes(file_names)-1
     system("echo " + file_names(ti))
     f = addfile(file_names(ti), "r")
     dims = dimsizes(f->id)

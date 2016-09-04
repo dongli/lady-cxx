@@ -8,13 +8,19 @@ begin
 
   wks = gsn_open_wks("pdf", "lady.fields")
 
+  gsn_define_colormap(wks, "BlueRed")
+
   res = True
   res@cnLinesOn = False
   res@cnFillOn = True
+  res@cnFillMode = "RasterFill"
   ; res@cnLevelSelectionMode = "ManualLevels"
   ; res@cnMinLevelValF = 0.99
   ; res@cnMaxLevelValF = 1.012
   ; res@cnLevelSpacingF = 0.0005
+  ; res@cnMinLevelValF = -1.0e-4
+  ; res@cnMaxLevelValF = 1.0e-4
+  ; res@cnLevelSpacingF = 1.0e-5
   ; res@trYMinF = 0.98
   ; res@trYMaxF = 1.02
 

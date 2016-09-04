@@ -9,8 +9,8 @@ int main(int argc, char const *argv[]) {
   lady::Dycore<2, lady::CartesianField> dycore;
 
   timeConfig.startTime = "2016-08-21 00:00:00";
-  timeConfig.endTime = "2016-08-21 00:00:10";
-  timeConfig.timeStepSize = 0.5;
+  timeConfig.endTime = "2016-08-21 00:00:20";
+  timeConfig.timeStepSize = 1;
   lady::TimeManager::init(timeConfig);
 
   domainConfig.axisStartCoords = { 0.0, 0.0 };
@@ -33,8 +33,10 @@ int main(int argc, char const *argv[]) {
   arma::vec::fixed<2> x0 = { 50.0, 50.0 };
   for (size_t i = 0; i < dycore.mesh().numGrid(); i++) {
     auto x = dycore.mesh().gridCoord(i);
-    h(i) = 1.0 + exp(- 0.4 * norm(x - x0)) * 0.01;
-    // h(i) = 1.0 + exp(- 0.4 * fabs(x[0] - x0[0])) * 0.01;
+    // x0[0] = 0.5 * (x[0] - x[1] + 100); // 45 degree
+    // x0[1] = 0.5 * (100 - x[0] + x[1]); // 45 degree
+    // h(i) = 1.0 + exp(- 0.4 * norm(x - x0)) * 0.01;
+    h(i) = 1.0 + exp(- 0.4 * fabs(x[0] - x0[0])) * 0.01;
   }
 
   dycore.inputBarotropicData(h, u, v);
