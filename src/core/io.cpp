@@ -181,7 +181,7 @@ void IO<NUM_DIM, FieldTemplate>::outputQuadPoints(const vector<QuadPoints<NUM_DI
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v) {
+void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v, double totalEnergy) {
   if (!TimeManager::alerts["output"].isOn()) return;
 
   // format fileNamePattern(filePrefix + ".fields.%1%.nc");
@@ -212,6 +212,9 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
   NcVar uVar = file.addVar("u", ncFloat, {timeDim, yDim, xDim});
   NcVar vVar = file.addVar("v", ncFloat, {timeDim, yDim, xDim});
 
+  NcVar totalEnergyVar = file.addVar("total_energy", ncFloat, timeDim);
+  totalEnergyVar.putAtt("long_name", "kinetic energy + geopotential energy");
+
   float *data = new float[mesh.numGrid()];
   int k;
   vector<size_t> start, count;
@@ -221,6 +224,9 @@ void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, 
 
   data[0] = TimeManager::elapsedSeconds();
   timeVar.putVar(start, count, data);
+
+  data[0] = totalEnergy;
+  totalEnergyVar.putVar(start, count, data);
 
   start = { 0 };
   count = { mesh.numGridAlongX() };

@@ -9,7 +9,7 @@ int main(int argc, char const *argv[]) {
   lady::Dycore<2, lady::CartesianField> dycore;
 
   timeConfig.startTime = "2016-08-21 00:00:00";
-  timeConfig.endTime = "2016-08-21 00:00:20";
+  timeConfig.endTime = "2016-08-21 00:02:00";
   timeConfig.timeStepSize = 1;
   lady::TimeManager::init(timeConfig);
 

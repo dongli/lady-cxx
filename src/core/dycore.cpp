@@ -83,6 +83,9 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBarotropicData(const FieldType &h, con
   this->h = h;
   this->V[0] = u;
   this->V[1] = v;
+
+  updateQuadPoints(0);
+  calcForces(0);
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
@@ -117,15 +120,14 @@ void Dycore<NUM_DIM, FieldTemplate>::inputBaroclinicData(const FieldType &p, con
   // Copy input data into internal fields.
   this->p = p;
   this->T = T;
+
+  updateQuadPoints(0);
+  calcForces(0);
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::run() {
   double dt = TimeManager::timeStepSize.total_milliseconds() * 1.0e-3;
-  if (TimeManager::isFirstStep()) {
-    updateQuadPoints(oldTi);
-    calcForces(oldTi);
-  }
   // Integrate in time direction.
   for (int pi = 0; pi < parcels[newTi].size(); pi++) {  // TODO: What about if parcels are inserted or removed dynamically?
     parcels[newTi][pi].v  = parcels[oldTi][pi].v  + 0.5 * dt * (parcels[oldTi][pi].Fp + parcels[oldTi][pi].Fr);
@@ -169,7 +171,7 @@ void Dycore<NUM_DIM, FieldTemplate>::run() {
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::output() {
   if (mode == BAROTROPIC) {
-    IO<NUM_DIM, FieldTemplate>::outputBarotropicData(_domain, _mesh, h, V[0], V[1]);
+    IO<NUM_DIM, FieldTemplate>::outputBarotropicData(_domain, _mesh, h, V[0], V[1], calcTotalEnergy(oldTi));
   }
 }
 
@@ -265,8 +267,10 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
       parcels[ti][pi].Mp -= a1 * a2 * QuadPoints<NUM_DIM>::y[qi].t();
     }
     parcels[ti][pi].Mp /= ShapeFunction<NUM_DIM>::J;
-    parcels[ti][pi].Fr /= 2 * parcels[ti][pi].m;
-    parcels[ti][pi].Mr /= 2 * parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
+    if (mode == BAROCLINIC) {
+      parcels[ti][pi].Fr /= 2 * parcels[ti][pi].m;
+      parcels[ti][pi].Mr /= 2 * parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
+    }
   }
 }
 
@@ -301,6 +305,25 @@ void Dycore<NUM_DIM, FieldTemplate>::calcHeats(int ti) {
       parcels[ti][pi].Qr *= Rr * 0.5;
     }
   }
+}
+
+template <int NUM_DIM, template <int ...> class FieldTemplate>
+double Dycore<NUM_DIM, FieldTemplate>::calcTotalEnergy(int ti) {
+  double totalEnergy = 0;
+  for (int pi = 0; pi < parcels[ti].size(); pi++) {
+    totalEnergy += parcels[ti][pi].m * dot(parcels[ti][pi].v, parcels[ti][pi].v);
+    totalEnergy += ShapeFunction<NUM_DIM>::J * parcels[ti][pi].m * pow(norm(parcels[ti][pi].dH, "fro"), 2);
+    switch (mode) {
+      case BAROTROPIC:
+        for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
+          totalEnergy += parcels[ti][pi].m * QuadPoints<NUM_DIM>::w[qi] * G * quadPoints[ti][pi].rho[qi];
+        }
+        break;
+      case BAROCLINIC:
+        break;
+    }
+  }
+  return totalEnergy;
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>

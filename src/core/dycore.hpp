@@ -71,6 +71,8 @@ private:
 
   void calcHeats(int ti);
 
+  double calcTotalEnergy(int ti);
+
   void regridBarotropicData(int ti);
 
   void regridBaroclinicData(int ti);
