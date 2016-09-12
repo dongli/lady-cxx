@@ -60,6 +60,7 @@ void QuadPoints<NUM_DIM>::init(Parcel<NUM_DIM> *parcel) {
 template <int NUM_DIM>
 template <class DomainType>
 void QuadPoints<NUM_DIM>::update(const DomainType &domain) {
+  Timer::start("updateQuadPoints");
   vec::fixed<NUM_DIM> y, v;
   double f;
   rho.zeros();
@@ -88,6 +89,7 @@ void QuadPoints<NUM_DIM>::update(const DomainType &domain) {
     this->T[qi] /= CV * this->rho[qi];
     this->v[qi] /= this->rho[qi];
   }
+  Timer::stop("updateQuadPoints");
 }
 
 template void QuadPoints<2>::update<CartesianDomain<2>>(const CartesianDomain<2> &domain);

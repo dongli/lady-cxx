@@ -10,7 +10,7 @@
 namespace lady {
 
 enum DycoreMode {
-  BAROTROPIC, BAROCLINIC
+  SHALLOW_WATER, BAROTROPIC, BAROCLINIC
 };
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
@@ -50,7 +50,7 @@ public:
 
   void init(const DycoreMode mode, const typename MeshType::MeshConfigType &meshConfig);
 
-  void inputBarotropicData(const FieldType &h, const FieldType &u, const FieldType &v);
+  void inputShallowWaterData(const FieldType &h, const FieldType &u, const FieldType &v);
 
   void inputBaroclinicData(const FieldType &p, const FieldType &T);
 
@@ -73,7 +73,7 @@ private:
 
   double calcTotalEnergy(int ti);
 
-  void regridBarotropicData(int ti);
+  void regridShallowWaterData(int ti);
 
   void regridBaroclinicData(int ti);
 

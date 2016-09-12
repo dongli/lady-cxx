@@ -51,7 +51,7 @@ void Dycore<NUM_DIM, FieldTemplate>::init(const DycoreMode mode, const typename 
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void Dycore<NUM_DIM, FieldTemplate>::inputBarotropicData(const FieldType &h, const FieldType &u, const FieldType &v) {
+void Dycore<NUM_DIM, FieldTemplate>::inputShallowWaterData(const FieldType &h, const FieldType &u, const FieldType &v) {
   sp_mat A(_mesh.numGrid(), _mesh.numGrid());
   vec b1(_mesh.numGrid()), b2(_mesh.numGrid()), b3(_mesh.numGrid());
   vec x1(_mesh.numGrid()), x2(_mesh.numGrid()), x3(_mesh.numGrid());
@@ -159,24 +159,26 @@ void Dycore<NUM_DIM, FieldTemplate>::run() {
     parcels[newTi][pi].v  += 0.5 * dt * (parcels[newTi][pi].Fp + parcels[newTi][pi].Fr);
     parcels[newTi][pi].dH += 0.5 * dt * (parcels[newTi][pi].Mp + parcels[newTi][pi].Mr);
   }
-  if (mode == BAROTROPIC) {
-    regridBarotropicData(newTi);
+  if (mode == SHALLOW_WATER) {
+    regridShallowWaterData(newTi);
   } else if (mode == BAROCLINIC) {
     regridBaroclinicData(newTi);
   }
   // Switch time indices.
   int ti = oldTi; oldTi = newTi; newTi = ti;
+  Timer::print();
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::output() {
-  if (mode == BAROTROPIC) {
-    IO<NUM_DIM, FieldTemplate>::outputBarotropicData(_domain, _mesh, h, V[0], V[1], calcTotalEnergy(oldTi));
+  if (mode == SHALLOW_WATER) {
+    IO<NUM_DIM, FieldTemplate>::outputShallowWaterData(_domain, _mesh, h, V[0], V[1], calcTotalEnergy(oldTi));
   }
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::findNeighbors(int ti) {
+  Timer::start("findNeighbors");
   for (int pi = 0; pi < parcels[ti].size(); pi++) {
     for (int di = 0; di < NUM_DIM; di++) {
       parcelCentroids.at(di, pi) = parcels[ti][pi].x[di];
@@ -200,6 +202,7 @@ void Dycore<NUM_DIM, FieldTemplate>::findNeighbors(int ti) {
       parcels[ti][pi].neighbors[mi++] = &parcels[ti][neighbors[0][ni]];
     }
   }
+  Timer::stop("findNeighbors");
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
@@ -211,6 +214,7 @@ void Dycore<NUM_DIM, FieldTemplate>::updateQuadPoints(int ti) {
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
 void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
+  Timer::start("calcForces");
   double f, rho, T, w, a1;
   vec::fixed<NUM_DIM> y, v, vi, a2;
   mat::fixed<NUM_DIM, NUM_DIM> a3;
@@ -230,7 +234,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
         w = QuadPoints<NUM_DIM>::w[qi];
         // First part of pressure force
         switch (mode) {
-          case BAROTROPIC:
+          case SHALLOW_WATER:
             a1 = neighbor.m * w * G * 0.5;
             break;
           case BAROCLINIC:
@@ -256,7 +260,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
       parcels[ti][pi].getShapeFunctionDerivatives(QuadPoints<NUM_DIM>::y[qi], QuadPoints<NUM_DIM>::f[qi], a2);
       w = QuadPoints<NUM_DIM>::w[qi];
       switch (mode) {
-        case BAROTROPIC:
+        case SHALLOW_WATER:
           a1 = parcels[ti][pi].m * w * G * 0.5;
           break;
         case BAROCLINIC:
@@ -272,6 +276,7 @@ void Dycore<NUM_DIM, FieldTemplate>::calcForces(int ti) {
       parcels[ti][pi].Mr /= 2 * parcels[ti][pi].m * ShapeFunction<NUM_DIM>::J;
     }
   }
+  Timer::stop("calcForces");
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
@@ -314,7 +319,7 @@ double Dycore<NUM_DIM, FieldTemplate>::calcTotalEnergy(int ti) {
     totalEnergy += parcels[ti][pi].m * dot(parcels[ti][pi].v, parcels[ti][pi].v);
     totalEnergy += ShapeFunction<NUM_DIM>::J * parcels[ti][pi].m * pow(norm(parcels[ti][pi].dH, "fro"), 2);
     switch (mode) {
-      case BAROTROPIC:
+      case SHALLOW_WATER:
         for (int qi = 0; qi < QuadPoints<NUM_DIM>::num; qi++) {
           totalEnergy += parcels[ti][pi].m * QuadPoints<NUM_DIM>::w[qi] * G * quadPoints[ti][pi].rho[qi];
         }
@@ -327,7 +332,7 @@ double Dycore<NUM_DIM, FieldTemplate>::calcTotalEnergy(int ti) {
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void Dycore<NUM_DIM, FieldTemplate>::regridBarotropicData(int ti) {
+void Dycore<NUM_DIM, FieldTemplate>::regridShallowWaterData(int ti) {
   // Find the neighboring grids of each parcel.
   h().fill(0); V[0]().fill(0); V[1]().fill(0);
   Range r(0, 0);

@@ -181,7 +181,7 @@ void IO<NUM_DIM, FieldTemplate>::outputQuadPoints(const vector<QuadPoints<NUM_DI
 }
 
 template <int NUM_DIM, template <int ...> class FieldTemplate>
-void IO<NUM_DIM, FieldTemplate>::outputBarotropicData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v, double totalEnergy) {
+void IO<NUM_DIM, FieldTemplate>::outputShallowWaterData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v, double totalEnergy) {
   if (!TimeManager::alerts["output"].isOn()) return;
 
   // format fileNamePattern(filePrefix + ".fields.%1%.nc");

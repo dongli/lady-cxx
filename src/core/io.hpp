@@ -28,7 +28,7 @@ public:
 
   static void outputQuadPoints(const vector<QuadPoints<NUM_DIM>> &quadPoints);
 
-  static void outputBarotropicData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v, double totalEnergy);
+  static void outputShallowWaterData(const DomainType &domain, const MeshType &mesh, const FieldType &h, const FieldType &u, const FieldType &v, double totalEnergy);
 
   static void outputBaroclinicData(const FieldType &p, const FieldType &T);
 };

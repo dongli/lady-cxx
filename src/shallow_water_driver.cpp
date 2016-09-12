@@ -9,15 +9,15 @@ int main(int argc, char const *argv[]) {
   lady::Dycore<2, lady::CartesianField> dycore;
 
   timeConfig.startTime = "2016-08-21 00:00:00";
-  timeConfig.endTime = "2016-08-21 00:02:00";
-  timeConfig.timeStepSize = 1;
+  timeConfig.endTime = "2016-08-21 00:01:00";
+  timeConfig.timeStepSize = 0.5;
   lady::TimeManager::init(timeConfig);
 
   domainConfig.axisStartCoords = { 0.0, 0.0 };
   domainConfig.axisEndCoords = { 100.0, 100.0 };
   domainConfig.axisBoundaryTypes = { lady::PERIODIC, lady::PERIODIC };
-  meshConfig.numGridAlongEachAxis[0] = 20;
-  meshConfig.numGridAlongEachAxis[1] = 20;
+  meshConfig.numGridAlongEachAxis[0] = 50;
+  meshConfig.numGridAlongEachAxis[1] = 50;
   dycore.init(lady::BAROTROPIC, meshConfig);
 
   lady::CartesianFieldConfig<2> fieldConfig(meshConfig);
@@ -36,10 +36,10 @@ int main(int argc, char const *argv[]) {
     // x0[0] = 0.5 * (x[0] - x[1] + 100); // 45 degree
     // x0[1] = 0.5 * (100 - x[0] + x[1]); // 45 degree
     // h(i) = 1.0 + exp(- 0.4 * norm(x - x0)) * 0.01;
-    h(i) = 1.0 + exp(- 0.4 * fabs(x[0] - x0[0])) * 0.01;
+    h(i) = 1.0 + exp(- 0.8 * fabs(x[0] - x0[0])) * 0.01;
   }
 
-  dycore.inputBarotropicData(h, u, v);
+  dycore.inputShallowWaterData(h, u, v);
   dycore.output();
 
   while (!lady::TimeManager::isFinished()) {
