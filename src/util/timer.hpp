@@ -7,7 +7,8 @@ namespace lady {
 
 class Timer {
 public:
-  static map<string, cpu_timer> timers;
+  static int timerLevel;
+  static map<string, std::pair<int, cpu_timer>> timers;
 
   static void start(const string &name);
 
